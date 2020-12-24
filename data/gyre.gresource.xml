@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/io/github/helpseeker/Gyre">
+    <file preprocess="xml-stripblanks">ui/about.ui</file>
+    <file preprocess="xml-stripblanks">ui/add_url.ui</file>
+    <file preprocess="xml-stripblanks">ui/add_item.ui</file>
+    <file preprocess="xml-stripblanks">ui/preferences.ui</file>
+    <file preprocess="xml-stripblanks">ui/window.ui</file>
+    <file preprocess="xml-stripblanks">ui/row.ui</file>
+    <file preprocess="xml-stripblanks">menu/menu.xml</file>
+    <file preprocess="xml-stripblanks">menu/add.xml</file>
+  </gresource>
+</gresources>

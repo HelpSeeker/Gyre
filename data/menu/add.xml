@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<interface>
+    <!-- interface-requires gtk+ 3.0 -->
+    <menu id="add-popover">
+        <section>
+            <item>
+                <attribute name="label" translatable="yes">Add URL</attribute>
+                <attribute name="action">app.add_url</attribute>
+            </item>
+            <item>
+                <attribute name="label" translatable="yes">Add Item</attribute>
+                <attribute name="action">app.add_item</attribute>
+            </item>
+        </section>
+    </menu>
+</interface>

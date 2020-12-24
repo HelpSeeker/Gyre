@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gyre">
+  <!-- TODO: Set limits and other restrictions -->
+  <enum id="FileExtension">
+    <value nick="mkv" value="0" />
+    <value nick="mp4" value="1" />
+    <value nick="asf" value="2" />
+    <value nick="avi" value="3" />
+    <value nick="flv" value="4" />
+    <value nick="f4v" value="5" />
+    <value nick="mov" value="6" />
+  </enum>
+  <enum id="VideoResolution">
+    <value nick="Lowest" value="0" />
+    <value nick="Highest" value="-1" />
+  </enum>
+  <enum id="MaxVideoResolution">
+    <value nick="640x480" value="0" />
+    <value nick="1280x960" value="1" />
+    <value nick="1600x1200" value="2" />
+  </enum>
+  <enum id="MinVideoResolution">
+    <value nick="640x480" value="0" />
+    <value nick="1280x960" value="1" />
+    <value nick="1600x1200" value="2" />
+  </enum>
+  <enum id="AudioQuality">
+    <value nick="Worst" value="0" />
+    <value nick="Best" value="-1" />
+  </enum>
+  <enum id="DownloadRecoubs">
+    <value nick="No Recoubs" value="0" />
+    <value nick="With Recoubs" value="1" />
+    <value nick="Only Recoubs" value="2" />
+  </enum>
+
+	<schema id="io.github.helpseeker.Gyre" path="/io/github/helpseeker/Gyre/">
+    <key type="s" name="output-path">
+      <default>''</default>
+      <summary>Output directory</summary>
+      <description>
+        Directory to save downloaded coubs in
+      </description>
+    </key>
+    <key enum="FileExtension" name="file-extension">
+      <default>'mkv'</default>
+      <summary>Output Extension</summary>
+      <description>
+        What media container to use to combine separate video/audio streams
+      </description>
+    </key>
+    <key type="s" name="name-template">
+      <default>'%id%'</default>
+      <summary>Name Template</summary>
+      <description>
+        Template to name downloaded coubs
+        Accepts a series of replacement strings:
+
+            %id%        - coub ID (identifier in the URL)
+            %title%     - coub title
+            %creation%  - creation date/time
+            %community% - coub community
+            %channel%   - channel title
+            %tags%      - all tags (separated by _)
+
+        Other strings will be interpreted literally
+      </description>
+    </key>
+    <key type="b" name="overwrite">
+      <default>false</default>
+      <summary>Overwrite Existing Files</summary>
+      <description>
+        Wheter to overwrite existing files or skip them
+      </description>
+    </key>
+    <key type="i" name="loop-limit">
+      <default>1000</default>
+      <summary>Limit Loops</summary>
+      <description>
+        Max. number of video loops per coub
+        In any case the amount is limited by the audio duration
+      </description>
+    </key>
+    <key type="s" name="duration-limit">
+      <default>''</default>
+      <summary>Limit Duration</summary>
+      <description>
+        Max. duration per coub (FFmpeg syntax)
+        Can be used together with a loop limit (the shorter option will be used)
+      </description>
+    </key>
+	  <key type="b" name="keep-streams">
+      <default>false</default>
+      <summary>Keep Streams</summary>
+      <description>
+        Keep audio/video streams instead of deleting them after merge
+      </description>
+    </key>
+    <key type="b" name="download-video">
+      <default>true</default>
+      <summary>Download Video</summary>
+      <description>
+        Whether to download video streams
+      </description>
+    </key>
+    <key enum="VideoResolution" name="video-resolution">
+      <default>'Highest'</default>
+      <summary>Video Resolution</summary>
+      <description>
+        Whether to prefer the highest or lowest available video resolution
+      </description>
+    </key>
+    <key enum="MaxVideoResolution" name="max-video-resolution">
+      <default>'1600x1200'</default>
+      <summary>Max. video resolution</summary>
+      <description>
+        The highest video resolution considered for download
+      </description>
+    </key>
+    <key enum="MinVideoResolution" name="min-video-resolution">
+      <default>'640x480'</default>
+      <summary>Min. video resolution</summary>
+      <description>
+        The lowest video resolution considered for download
+      </description>
+    </key>
+    <key type="b" name="download-audio">
+      <default>true</default>
+      <summary>Download Audio</summary>
+      <description>
+        Whether to download audio streams
+      </description>
+    </key>
+    <key enum="AudioQuality" name="audio-quality">
+      <default>'Best'</default>
+      <summary>Audio quality</summary>
+      <description>
+        Whether to prefer the best or worst available audio quality
+      </description>
+    </key>
+    <key type="b" name="download-share-version">
+      <default>false</default>
+      <summary>Download 'share' version</summary>
+      <description>
+        Download the version as provided by Coub's own download button
+      </description>
+    </key>
+    <key type="i" name="connections">
+      <default>25</default>
+      <summary>Connections</summary>
+      <description>
+        How many connections aiohttp is allowed to use
+        Excessive values will lead to Coub disconnecting you
+      </description>
+    </key>
+    <key type="i" name="retry-attempts">
+      <default>5</default>
+      <summary>Retries</summary>
+      <description>
+        How often to reconnect after connection loss
+        -1 for infinite retries
+      </description>
+    </key>
+    <key type="i" name="quantity-limit">
+      <default>0</default>
+      <summary>Limit Quantity</summary>
+      <description>
+        Max. number of coubs to download during a single session
+        0 for infinite coubs
+      </description>
+    </key>
+    <key enum="DownloadRecoubs" name="download-recoubs">
+      <default>'With Recoubs'</default>
+      <summary>Download Recoubs</summary>
+      <description>
+        How to treat recoubs during channel downloads
+      </description>
+    </key>
+	  <key type="b" name="archive">
+      <default>false</default>
+      <summary>Use Archive</summary>
+      <description>
+        Whether to keep track of downloaded coubs
+      </description>
+	  </key>
+    <key type="s" name="archive-path">
+      <default>''</default>
+      <summary>Archive Path</summary>
+      <description>
+        Path to archive file
+      </description>
+    </key>
+    <key type="b" name="output-list">
+      <default>false</default>
+      <summary>Output Link List</summary>
+      <description>
+        Output parsed coub links instead of downloading them
+      </description>
+    </key>
+    <key type="s" name="output-list-path">
+      <default>''</default>
+      <summary>Link List Path</summary>
+      <description>
+        Path to link list file
+      </description>
+    </key>
+    <key type="b" name="info-json">
+      <default>false</default>
+      <summary>Info JSON</summary>
+      <description>
+        Output additional infos for downloaded coubs
+      </description>
+    </key>
+    <key type="s" name="info-json-path">
+      <default>''</default>
+      <summary>Info JSON Path</summary>
+      <description>
+        Path to info JSON file
+      </description>
+    </key>
+    <key type="s" name="tag-separator">
+      <default>'_'</default>
+      <summary>Tag Separator</summary>
+      <description>
+        Character or string to separate tags in the output filename
+      </description>
+    </key>
+    <key type="i" name="download-chunk-size">
+      <default>1024</default>
+      <summary>Download chunk size</summary>
+      <description>
+        Testing feature - not intended for normal users
+      </description>
+    </key>
+	  <key type="b" name="allow-unicode">
+	    <default>true</default>
+	    <summary>Allow Unicode Filenames</summary>
+	    <description>
+        Whether to allow unicode filenames or force ASCII
+	    </description>
+	  </key>
+	</schema>
+</schemalist>

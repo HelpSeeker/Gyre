@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2020 HelpSeeker <AlmostSerious@protonmail.ch> -->
+<component type="desktop-application">
+  <id>io.github.helpseeker.Gyre</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Gyre</name>
+  <content_rating type="oars-1.1" />
+  <summary>Download videos from Coub</summary>
+  <description>
+    <p>Gyre is a GTK3 downloader for videos from Coub.</p>
+    <p>What you can download with Gyre:</p>
+    <ul>
+      <li>Single coubs</li>
+      <li>Stories</li>
+      <li>Channels</li>
+      <li>Tags</li>
+      <li>Search results</li>
+      <li>Communities (incl. Featured and Coub of the Day)</li>
+      <li>Hot coubs</li>
+      <li>Random coubs</li>
+    </ul>
+    <p>Ready to use on desktop and mobile.</p>
+  </description>
+
+  <launchable type="desktop-id">io.github.helpseeker.Gyre.desktop</launchable>
+
+  <screenshots>
+      <screenshot type="default">
+          <image>https://raw.githubusercontent.com/HelpSeeker/Gyre/master/data/screenshots/desktop_light_16x9.png</image>
+      </screenshot>
+      <screenshot>
+          <image>https://raw.githubusercontent.com/HelpSeeker/Gyre/master/data/screenshots/desktop_dark_16x9.png</image>
+      </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/HelpSeeker/Gyre</url>
+  <url type="bugtracker">https://github.com/HelpSeeker/Gyre/issues</url>
+  <developer_name>HelpSeeker</developer_name>
+  <update_contact>AlmostSerious_AT_protonmail.ch</update_contact>
+
+  <releases>
+    <release version="0.1.0" date="2020-12-24">
+      <description>
+        <p>First Release</p>
+      </description>
+    </release>
+  </releases>
+</component>

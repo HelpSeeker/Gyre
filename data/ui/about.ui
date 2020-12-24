@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.1 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <template class="AboutWindow" parent="GtkAboutDialog">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">About</property>
+    <property name="modal">True</property>
+    <property name="type-hint">dialog</property>
+    <property name="program-name">Gyre</property>
+    <property name="version">0.1.0</property>
+    <property name="copyright" translatable="yes">© 2020 Helpseeker</property>
+    <property name="comments" translatable="yes">A downloader for coub.com</property>
+    <property name="website">https://github.com/HelpSeeker/Gyre</property>
+    <property name="website-label" translatable="yes">Visit Gyre's GitHub page</property>
+    <property name="logo-icon-name">io.github.helpseeker.Gyre</property>
+    <property name="license-type">gpl-3-0</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
