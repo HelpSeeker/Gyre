@@ -34,7 +34,7 @@
     <value nick="Only Recoubs" value="2" />
   </enum>
 
-	<schema id="io.github.helpseeker.Gyre" path="/io/github/helpseeker/Gyre/">
+  <schema id="io.github.helpseeker.Gyre" path="/io/github/helpseeker/Gyre/">
     <key type="s" name="output-path">
       <default>''</default>
       <summary>Output directory</summary>
@@ -89,7 +89,7 @@
         Can be used together with a loop limit (the shorter option will be used)
       </description>
     </key>
-	  <key type="b" name="keep-streams">
+    <key type="b" name="keep-streams">
       <default>false</default>
       <summary>Keep Streams</summary>
       <description>
@@ -176,13 +176,13 @@
         How to treat recoubs during channel downloads
       </description>
     </key>
-	  <key type="b" name="archive">
+    <key type="b" name="archive">
       <default>false</default>
       <summary>Use Archive</summary>
       <description>
         Whether to keep track of downloaded coubs
       </description>
-	  </key>
+    </key>
     <key type="s" name="archive-path">
       <default>''</default>
       <summary>Archive Path</summary>
@@ -232,19 +232,19 @@
         Testing feature - not intended for normal users
       </description>
     </key>
-	  <key type="b" name="allow-unicode">
-	    <default>true</default>
-	    <summary>Allow Unicode Filenames</summary>
-	    <description>
+    <key type="b" name="allow-unicode">
+      <default>true</default>
+      <summary>Allow Unicode Filenames</summary>
+      <description>
         Whether to allow unicode filenames or force ASCII
-	    </description>
-	  </key>
-	  <key type="b" name="first-start">
-	    <default>true</default>
-	    <summary>First Application Start</summary>
-	    <description>
+      </description>
+    </key>
+    <key type="b" name="first-start">
+      <default>true</default>
+      <summary>First Application Start</summary>
+      <description>
         Whether Gyre is being launched for the first time
-	    </description>
-	  </key>
-	</schema>
+      </description>
+    </key>
+  </schema>
 </schemalist>

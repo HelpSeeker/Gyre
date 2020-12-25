@@ -22,10 +22,10 @@
         "*.a"
     ],
     "modules" : [
-    	"python3-aiohttp.json",
-    	{
-    	    "name" : "ffmpeg",
-    	    "config-opts" : [
+        "python3-aiohttp.json",
+        {
+            "name" : "ffmpeg",
+            "config-opts" : [
                 "--disable-all",
                 "--enable-avcodec",
                 "--enable-avformat",
@@ -35,15 +35,15 @@
                 "--enable-demuxer=concat,mov,mp3",
                 "--enable-muxer=matroska,mp4,asf,avi,flv,f4v,mov",
                 "--enable-bsf=h264_mp4toannexb"
-    	    ],
-    	    "sources" : [
-    	        {
-    	            "type" : "git",
-    	            "url" : "https://git.ffmpeg.org/ffmpeg.git",
-    	            "tag" : "n4.3.1"
-    	        }
-    	    ]
-    	},
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://git.ffmpeg.org/ffmpeg.git",
+                    "tag" : "n4.3.1"
+                }
+            ]
+        },
         {
             "name" : "libhandy",
             "buildsystem" : "meson",
