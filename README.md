@@ -21,9 +21,9 @@ A downloader for videos (called coubs) from [Coub](https://coub.com).
 
 There are several ways to install Gyre.
 
-### Download from Flathub
+### Flathub
 
-Coming soon!
+<a href='https://flathub.org/apps/details/io.github.helpseeker.Gyre'><img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png'/></a>
 
 ### Build with GNOME Builder
 
