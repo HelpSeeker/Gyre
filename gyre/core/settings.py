@@ -275,3 +275,11 @@ class Settings(Gio.Settings):
     @allow_unicode.setter
     def allow_unicode(self, value):
         return self.set_boolean("allow-unicode", value)
+
+    @property
+    def first_start(self):
+        return self.get_boolean("first-start")
+
+    @first_start.setter
+    def first_start(self, value):
+        return self.set_boolean("first-start", value)

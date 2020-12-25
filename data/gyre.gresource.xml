@@ -7,6 +7,7 @@
     <file preprocess="xml-stripblanks">ui/preferences.ui</file>
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/row.ui</file>
+    <file preprocess="xml-stripblanks">ui/welcome.ui</file>
     <file preprocess="xml-stripblanks">menu/menu.xml</file>
     <file preprocess="xml-stripblanks">menu/add.xml</file>
   </gresource>

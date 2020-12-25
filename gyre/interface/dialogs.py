@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Gyre.  If not, see <https://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Handy
 
 from gyre.utils import get_error_log
 from gyre.core.settings import Settings
@@ -143,3 +143,26 @@ class InvalidSettingsError(Gtk.MessageDialog):
             modal=True,
             transient_for=parent,
         )
+
+
+@Gtk.Template(resource_path="/io/github/helpseeker/Gyre/ui/welcome.ui")
+class WelcomeScreen(Handy.Window):
+    __gtype_name__ = "WelcomeScreen"
+
+    chooser = Gtk.Template.Child("chooser")
+    continue_button = Gtk.Template.Child("continue_button")
+
+    def __init__(self):
+        super().__init__()
+
+        self.continue_button.set_sensitive(False)
+
+        self.chooser.connect("file-set", self._file_set)
+        self.continue_button.connect("clicked", self._button_clicked)
+
+    def _file_set(self, chooser):
+        Settings.get_default().output_path = chooser.get_filename()
+        self.continue_button.set_sensitive(True)
+
+    def _button_clicked(self, button):
+        self.destroy()

@@ -124,6 +124,12 @@ class Application(Gtk.Application):
             self.window.connect("delete-event", self._on_delete_event)
             self.window.show_all()
 
+            if Settings.get_default().first_start:
+                dialog = dialogs.WelcomeScreen()
+                dialog.set_transient_for(self.window)
+                dialog.show_all()
+                Settings.get_default().first_start = False
+
         self.window.present()
 
     def _on_delete_event(self, *args):

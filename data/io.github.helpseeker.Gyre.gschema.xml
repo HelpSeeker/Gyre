@@ -239,5 +239,12 @@
         Whether to allow unicode filenames or force ASCII
 	    </description>
 	  </key>
+	  <key type="b" name="first-start">
+	    <default>true</default>
+	    <summary>First Application Start</summary>
+	    <description>
+        Whether Gyre is being launched for the first time
+	    </description>
+	  </key>
 	</schema>
 </schemalist>
