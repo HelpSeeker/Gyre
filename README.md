@@ -37,15 +37,15 @@ The following commands will clone this repository and install Gyre (system-wide 
 git clone https://github.com/HelpSeeker/Gyre.git
 cd Gyre
 meson . _build
-meson configure -Dprefix=<custom location>  # optional step
 cd _build
+meson configure -Dprefix=<custom location>  # optional step
 ninja install
 ```
 
 The 4th step is optional and allows you to specify a custom install location. Depending on the location GLib might not be able to find the GSettings schema, which is required to run Gyre. If that is the case, you have to manually point it to the schema
 
 ```
-GSETTINGS_SCHEMA_DIR=<custom location>/share/glib-2.0/schemas <custom path>/bin/gyre
+GSETTINGS_SCHEMA_DIR=<custom location>/share/glib-2.0/schemas <custom location>/bin/gyre
 ```
 
 ## Dependencies
