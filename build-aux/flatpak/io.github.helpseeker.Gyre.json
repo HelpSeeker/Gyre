@@ -70,9 +70,8 @@
             "buildsystem" : "meson",
             "sources" : [
                 {
-                    "type" : "git",
-                    "url" : "https://github.com/HelpSeeker/Gyre.git",
-                    "tag" : "v0.1.0"
+                    "type" : "dir",
+                    "path" : "../../."
                 }
             ]
         }
