@@ -17,6 +17,7 @@
 
 from gi.repository import Gtk, GLib
 
+from gyre.utils import translate_community_name
 from gyre.core.settings import Settings
 from gyre.interface.add import AddWindow
 
@@ -41,12 +42,15 @@ class InputRow(Gtk.ListBoxRow):
         self.model = model
         self.window = window
 
+        if self.item.id and self.item.type == "Community":
+            item_id = translate_community_name(self.item.id)
+        else:
+            item_id = self.item.id
+
         self.main_label.set_label("".join([
             self.item.type,
-            f": {self.item.id}" if self.item.id else "",
+            f": {item_id}" if item_id else "",
             f" (limit: {self.item.quantity})" if self.item.quantity else "",
-
-
         ]))
         self.subtitle.set_label(f"sorted by '{self.item.sort}'" if self.item.sort else "")
 
