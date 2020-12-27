@@ -140,3 +140,33 @@ def export_profile(path, liststore):
 
     with path.open("w") as f:
         json.dump(content, f)
+
+
+def translate_community_name(community, direction="to_ui"):
+    name_map = {
+        "animals-pets": "Animals & Pets",
+        "anime": "Anime",
+        "art": "Art & Design",
+        "cars": "Auto & Technique",
+        "cartoons": "Cartoons",
+        "celebrity": "Celebrity",
+        "dance": "Dance",
+        "fashion": "Fashion & Beauty",
+        "gaming": "Gaming",
+        "mashup": "Mashup",
+        "movies": "Movies & TV",
+        "music": "Music",
+        "nature-travel": "Nature & Travel",
+        "news": "News & Politics",
+        "nsfw": "NSFW",
+        "science-technology": "Science & Technology",
+        "sports": "Sports",
+    }
+
+    if direction == "to_ui":
+        return name_map[community]
+    if direction == "to_api":
+        reverse_map = dict(zip(name_map.values(), name_map.keys()))
+        return reverse_map[community]
+
+    raise ValueError("Invalid direction")
