@@ -213,17 +213,17 @@ class Coub:
 
         with concat_file.open("w") as f:
             for _ in range(Settings.get_default().loop_limit):
-                print(f"file 'file:{self.video_file}'", file=f)
+                print(f"file '{self.video_file}'", file=f)
 
         command = [
             "ffmpeg", "-y", "-v", "error",
             "-f", "concat", "-safe", "0",
-            "-i", f"file:{concat_file}",
-            "-i", f"file:{self.audio_file}",
+            "-i", str(concat_file),
+            "-i", str(self.audio_file),
         ]
         if Settings.get_default().duration_limit:
             command.extend(["-t", Settings.get_default().duration_limit])
-        command.extend(["-c", "copy", "-shortest", f"file:{temp_file}"])
+        command.extend(["-c", "copy", "-shortest", str(temp_file)])
 
         subprocess.run(command, check=False)
 
