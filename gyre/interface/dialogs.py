@@ -166,3 +166,8 @@ class WelcomeScreen(Handy.Window):
 
     def _button_clicked(self, button):
         self.destroy()
+
+
+@Gtk.Template(resource_path="/io/github/helpseeker/Gyre/ui/about.ui")
+class AboutDialog(Gtk.AboutDialog):
+    __gtype_name__ = "AboutDialog"

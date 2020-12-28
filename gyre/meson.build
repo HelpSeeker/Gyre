@@ -30,7 +30,6 @@ core_sources = [
 ]
 
 interface_sources = [
-  'interface' / 'about.py',
   'interface' / 'add.py',
   'interface' / 'dialogs.py',
   'interface' / 'preferences.py',

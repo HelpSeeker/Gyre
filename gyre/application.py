@@ -33,7 +33,6 @@ from gyre import utils
 from gyre.core.container import cancel_containers, uncancel_containers
 from gyre.core.coub import Coub, cancel_coubs, uncancel_coubs
 from gyre.core.settings import Settings
-from gyre.interface.about import AboutWindow
 from gyre.interface.add import AddURLWindow, AddWindow
 from gyre.interface.window import GyreWindow
 from gyre.interface.preferences import PreferenceWindow
@@ -204,7 +203,7 @@ class Application(Gtk.Application):
             dialog.destroy()
 
     def do_open_about(self, *args):
-        about_dialog = AboutWindow()
+        about_dialog = dialogs.AboutDialog()
         about_dialog.set_transient_for(self.window)
         if about_dialog.run() == Gtk.ResponseType.DELETE_EVENT:
             about_dialog.destroy()
