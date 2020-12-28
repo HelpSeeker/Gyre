@@ -1,52 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.38.2 -->
+<!-- Cleaned up by hand -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <requires lib="libhandy" version="0.0"/>
-  <!-- TODO: Find out if it's seriously necessary to have 3x the same pic -->
+  <requires lib="libhandy" version="1.0"/>
+  <!-- For some reason you can't re-use one image for several buttons -->
   <object class="GtkImage" id="save_button_img1">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
     <property name="icon-name">document-open-symbolic</property>
   </object>
   <object class="GtkImage" id="save_button_img2">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
     <property name="icon-name">document-open-symbolic</property>
   </object>
   <object class="GtkImage" id="save_button_img3">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
     <property name="icon-name">document-open-symbolic</property>
   </object>
   <template class="PreferenceWindow" parent="HdyPreferencesWindow">
-    <property name="can-focus">False</property>
     <property name="modal">True</property>
     <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
     <property name="can-swipe-back">True</property>
     <child>
       <object class="HdyPreferencesPage" id="output">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
         <property name="icon-name">folder-symbolic</property>
         <property name="title" translatable="yes">Output</property>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Location</property>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Output Directory</property>
                 <property name="activatable-widget">path_chooser</property>
                 <property name="subtitle" translatable="yes">Where to save downloaded files</property>
                 <child>
                   <object class="GtkFileChooserButton" id="path_chooser">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
                     <property name="valign">center</property>
                     <property name="action">select-folder</property>
                     <property name="title" translatable="yes">Choose Output Directory</property>
@@ -56,23 +42,17 @@
             </child>
             <child>
               <object class="HdyComboRow" id="container_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Container</property>
                 <property name="subtitle" translatable="yes">Which format (extension) to use</property>
               </object>
             </child>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Name Template</property>
                 <property name="activatable-widget">name_entry</property>
                 <property name="subtitle" translatable="yes">How to name downloaded files</property>
                 <child>
                   <object class="GtkEntry" id="name_entry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="placeholder-text" translatable="yes">e.g. %id%</property>
                   </object>
@@ -81,18 +61,12 @@
             </child>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Overwrite</property>
                 <property name="activatable-widget">overwrite_switch</property>
                 <property name="subtitle" translatable="yes">Replace existing files instead of skipping them</property>
                 <child>
                   <object class="GtkSwitch" id="overwrite_switch">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="hexpand">False</property>
                   </object>
                 </child>
               </object>
@@ -101,20 +75,14 @@
         </child>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Length</property>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Loops</property>
                 <property name="activatable-widget">loop_spin_button</property>
                 <property name="subtitle" translatable="yes">Limit the max. amount of loops per coub</property>
                 <child>
                   <object class="GtkSpinButton" id="loop_spin_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="max-width-chars">5</property>
                     <property name="input-purpose">number</property>
@@ -126,15 +94,11 @@
             </child>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Duration</property>
                 <property name="activatable-widget">duration_entry</property>
                 <property name="subtitle" translatable="yes">Limit the max. duration of each coub (FFmpeg syntax)</property>
                 <child>
                   <object class="GtkEntry" id="duration_entry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="placeholder-text" translatable="yes">e.g. 10, 01:12.25</property>
                   </object>
@@ -145,23 +109,15 @@
         </child>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Streams</property>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Keep Streams</property>
                 <property name="activatable-widget">keep_switch</property>
                 <property name="subtitle" translatable="yes">Don't delete individual streams after merging</property>
                 <child>
                   <object class="GtkSwitch" id="keep_switch">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="hexpand">False</property>
                   </object>
                 </child>
               </object>
@@ -172,52 +128,36 @@
     </child>
     <child>
       <object class="HdyPreferencesPage" id="quality">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
         <property name="icon-name">video-x-generic-symbolic</property>
         <property name="title" translatable="yes">Quality</property>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Video</property>
             <child>
               <object class="HdyActionRow" id="video_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Download Video</property>
                 <property name="activatable-widget">video_switch</property>
                 <child>
                   <object class="GtkSwitch" id="video_switch">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="hexpand">False</property>
                   </object>
                 </child>
               </object>
             </child>
             <child>
               <object class="HdyComboRow" id="resolution_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Video Resolution</property>
                 <property name="subtitle" translatable="yes">Choose your preferred resolution</property>
               </object>
             </child>
             <child>
               <object class="HdyComboRow" id="max_res_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Max. Resolution</property>
                 <property name="subtitle" translatable="yes">Limit max. resolution considered for download</property>
               </object>
             </child>
             <child>
               <object class="HdyComboRow" id="min_res_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Min. Resolution</property>
                 <property name="subtitle" translatable="yes">Limit min. resolution considered for download</property>
               </object>
@@ -226,30 +166,20 @@
         </child>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Audio</property>
             <child>
               <object class="HdyActionRow" id="audio_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Download Audio</property>
                 <property name="activatable-widget">audio_switch</property>
                 <child>
                   <object class="GtkSwitch" id="audio_switch">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="hexpand">False</property>
                   </object>
                 </child>
               </object>
             </child>
             <child>
               <object class="HdyComboRow" id="audio_quality_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Audio Quality</property>
                 <property name="subtitle" translatable="yes">Choose your preferred audio quality</property>
               </object>
@@ -258,23 +188,15 @@
         </child>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Special</property>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Share Version</property>
                 <property name="activatable-widget">share_switch</property>
                 <property name="subtitle" translatable="yes">Get coubs as provided by Coub's own download button</property>
                 <child>
                   <object class="GtkSwitch" id="share_switch">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">center</property>
                     <property name="valign">center</property>
-                    <property name="hexpand">False</property>
                   </object>
                 </child>
               </object>
@@ -285,26 +207,18 @@
     </child>
     <child>
       <object class="HdyPreferencesPage" id="download">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
         <property name="icon-name">document-save-symbolic</property>
         <property name="title" translatable="yes">Download</property>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Network</property>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Connections</property>
                 <property name="activatable-widget">connections_spin_button</property>
                 <property name="subtitle" translatable="yes">How many connections to use</property>
                 <child>
                   <object class="GtkSpinButton" id="connections_spin_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="max-width-chars">5</property>
                     <property name="input-purpose">number</property>
@@ -316,15 +230,11 @@
             </child>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Retries</property>
                 <property name="activatable-widget">retries_spin_button</property>
                 <property name="subtitle" translatable="yes">How often to reconnect after errors (-1 for infinite retries)</property>
                 <child>
                   <object class="GtkSpinButton" id="retries_spin_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="max-width-chars">5</property>
                     <property name="input-purpose">number</property>
@@ -338,20 +248,14 @@
         </child>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="title" translatable="yes">Limits and Filters</property>
             <child>
               <object class="HdyActionRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Quantity</property>
                 <property name="activatable-widget">quantity_spin_button</property>
                 <property name="subtitle" translatable="yes">Limit number of downloaded coubs (0 for no limit)</property>
                 <child>
                   <object class="GtkSpinButton" id="quantity_spin_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="valign">center</property>
                     <property name="max-width-chars">5</property>
                     <property name="input-purpose">number</property>
@@ -363,8 +267,6 @@
             </child>
             <child>
               <object class="HdyComboRow" id="recoubs_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Recoubs</property>
                 <property name="subtitle" translatable="yes">Change how recoubs are treated during channel downloads</property>
               </object>
@@ -375,36 +277,20 @@
     </child>
     <child>
       <object class="HdyPreferencesPage" id="misc">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
         <property name="icon-name">preferences-other-symbolic</property>
         <property name="title" translatable="yes">Misc</property>
         <child>
           <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-          </object>
-        </child>
-        <child>
-          <object class="HdyPreferencesGroup">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <child>
               <object class="HdyExpanderRow" id="archive_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Archive</property>
                 <property name="subtitle" translatable="yes">Keep track of downloaded coubs in an archive file</property>
                 <property name="show-enable-switch">True</property>
                 <child>
                   <object class="HdyActionRow">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="title" translatable="yes">Save as...</property>
                     <child>
                       <object class="GtkButton" id="archive_path_button">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="label" translatable="yes">(None) </property>
                         <property name="image">save_button_img1</property>
@@ -418,20 +304,14 @@
             </child>
             <child>
               <object class="HdyExpanderRow" id="output_list_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Only Parse</property>
                 <property name="subtitle" translatable="yes">Output parsed links instead of downloading them</property>
                 <property name="show-enable-switch">True</property>
                 <child>
                   <object class="HdyActionRow">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="title" translatable="yes">Save as...</property>
                     <child>
                       <object class="GtkButton" id="output_list_path_button">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="label" translatable="yes">(None) </property>
                         <property name="image">save_button_img2</property>
@@ -445,20 +325,14 @@
             </child>
             <child>
               <object class="HdyExpanderRow" id="json_row">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="title" translatable="yes">Info JSON</property>
                 <property name="subtitle" translatable="yes">Save additional coub infos</property>
                 <property name="show-enable-switch">True</property>
                 <child>
                   <object class="HdyActionRow">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="title" translatable="yes">Save as...</property>
                     <child>
                       <object class="GtkButton" id="json_path_button">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="label" translatable="yes">(None) </property>
                         <property name="image">save_button_img3</property>
