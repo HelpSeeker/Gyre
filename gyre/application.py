@@ -18,6 +18,7 @@
 import asyncio
 import pathlib
 import time
+import traceback
 import urllib
 
 import aiohttp
@@ -332,3 +333,8 @@ async def process(model):
         except utils.CancelledError:
             for item in model:
                 item.status = "Cancelled"
+        except:
+            for item in model:
+                item.status = "Error: Unknown error"
+            error = traceback.format_exc()
+            utils.write_error_log(error)
