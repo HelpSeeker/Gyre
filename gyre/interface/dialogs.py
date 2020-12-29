@@ -19,6 +19,7 @@ from gi.repository import Gtk, Handy
 
 from gyre.utils import get_error_log
 from gyre.core.settings import Settings
+from gyre.interface.widgets import FileChooserButton
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -81,17 +82,21 @@ class MissingPathWarning(Gtk.MessageDialog):
             modal=True,
             transient_for=parent,
         )
-        chooser = Gtk.FileChooserButton(
+        output_button = FileChooserButton(
+            label=None,
             title="Choose Output Directory",
+            parent=self,
             action=Gtk.FileChooserAction.SELECT_FOLDER,
         )
-        chooser.connect("file-set", self._on_output_path_changed)
-        self.get_message_area().add(chooser)
+        output_button.set_halign(Gtk.Align.CENTER)
+        output_button.connect("clicked", self._on_output_button_clicked)
+        self.get_message_area().add(output_button)
         self.show_all()
 
     @staticmethod
-    def _on_output_path_changed(chooser):
-        Settings.get_default().output_path = chooser.get_filename()
+    def _on_output_button_clicked(dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            Settings.get_default().output_path = dialog_button.filename
 
 
 class CloseConfirmation(Gtk.MessageDialog):
@@ -149,7 +154,8 @@ class InvalidSettingsError(Gtk.MessageDialog):
 class WelcomeScreen(Handy.Window):
     __gtype_name__ = "WelcomeScreen"
 
-    chooser = Gtk.Template.Child("chooser")
+    box = Gtk.Template.Child("box")
+    placeholder = Gtk.Template.Child("placeholder")
     continue_button = Gtk.Template.Child("continue_button")
 
     def __init__(self):
@@ -157,12 +163,24 @@ class WelcomeScreen(Handy.Window):
 
         self.continue_button.set_sensitive(False)
 
-        self.chooser.connect("file-set", self._file_set)
+        output_button = FileChooserButton(
+            label=Settings.get_default().output_path,
+            title="Choose Output Directory",
+            parent=self,
+            action=Gtk.FileChooserAction.SELECT_FOLDER,
+        )
+        output_button.set_halign(Gtk.Align.CENTER)
+        output_button.connect("clicked", self._on_output_button_clicked)
+
+        self.box.remove(self.placeholder)
+        self.box.pack_start(output_button, False, False, 18)
+        self.box.reorder_child(output_button, 4)
         self.continue_button.connect("clicked", self._button_clicked)
 
-    def _file_set(self, chooser):
-        Settings.get_default().output_path = chooser.get_filename()
-        self.continue_button.set_sensitive(True)
+    def _on_output_button_clicked(self, dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            Settings.get_default().output_path = dialog_button.filename
+            self.continue_button.set_sensitive(True)
 
     def _button_clicked(self, button):
         self.destroy()

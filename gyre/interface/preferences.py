@@ -20,6 +20,7 @@ import pathlib
 from gi.repository import Gtk, Gio, Handy
 
 from gyre.core.settings import Settings
+from gyre.interface.widgets import FileChooserButton
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -32,7 +33,7 @@ class PreferenceWindow(Handy.PreferencesWindow):
     ### Output
 
     # Location
-    path_chooser = Gtk.Template.Child("path_chooser")
+    output_action_row = Gtk.Template.Child("output_action_row")
     container_row = Gtk.Template.Child("container_row")
     name_entry = Gtk.Template.Child("name_entry")
     overwrite_switch = Gtk.Template.Child("overwrite_switch")
@@ -74,11 +75,11 @@ class PreferenceWindow(Handy.PreferencesWindow):
     ### Misc
 
     archive_row = Gtk.Template.Child("archive_row")
-    archive_path_button = Gtk.Template.Child("archive_path_button")
+    archive_action_row = Gtk.Template.Child("archive_action_row")
     output_list_row = Gtk.Template.Child("output_list_row")
-    output_list_path_button = Gtk.Template.Child("output_list_path_button")
+    output_list_action_row = Gtk.Template.Child("output_list_action_row")
     json_row = Gtk.Template.Child("json_row")
-    json_path_button = Gtk.Template.Child("json_path_button")
+    json_action_row = Gtk.Template.Child("json_action_row")
 
     def __init__(self):
         super().__init__()
@@ -95,8 +96,14 @@ class PreferenceWindow(Handy.PreferencesWindow):
 
     def _prepare_output_widgets(self):
         # Output Path
-        self.path_chooser.set_filename(self.settings.output_path)
-        self.path_chooser.connect("selection-changed", self._on_path_changed)
+        output_button = FileChooserButton(
+            label=self.settings.output_path,
+            title="Choose Output Directory",
+            parent=self,
+            action=Gtk.FileChooserAction.SELECT_FOLDER,
+        )
+        output_button.connect("clicked", self._on_output_button_clicked)
+        self.output_action_row.add(output_button)
 
         # Container
         liststore = Gio.ListStore.new(Handy.ValueObject)
@@ -237,33 +244,42 @@ class PreferenceWindow(Handy.PreferencesWindow):
         self.archive_row.set_enable_expansion(self.settings.archive)
         self.archive_row.connect("notify::enable-expansion", self._on_archive_changed)
 
-        if self.settings.archive_path:
-            self.archive_path_button.set_label(f"{pathlib.Path(self.settings.archive_path).name} ")
-        else:
-            self.archive_path_button.set_label("(None) ")
-        self.archive_path_button.connect("clicked", self._on_archive_path_button_clicked)
+        archive_button = FileChooserButton(
+            label=self.settings.archive_path,
+            title="Save Archive File",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE,
+        )
+        archive_button.connect("clicked", self._on_archive_path_button_clicked)
+        self.archive_action_row.add(archive_button)
 
         # Output List
         self.output_list_row.set_expanded(self.settings.output_list)
         self.output_list_row.set_enable_expansion(self.settings.output_list)
         self.output_list_row.connect("notify::enable-expansion", self._on_output_list_changed)
 
-        if self.settings.output_list_path:
-            self.output_list_path_button.set_label(f"{pathlib.Path(self.settings.output_list_path).name} ")
-        else:
-            self.output_list_path_button.set_label("(None) ")
-        self.output_list_path_button.connect("clicked", self._on_output_list_path_button_clicked)
+        output_list_button = FileChooserButton(
+            label=self.settings.output_list_path,
+            title="Save Link List",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE,
+        )
+        output_list_button.connect("clicked", self._on_output_list_path_button_clicked)
+        self.output_list_action_row.add(output_list_button)
 
         # Info JSON
         self.json_row.set_expanded(self.settings.info_json)
         self.json_row.set_enable_expansion(self.settings.info_json)
         self.json_row.connect("notify::enable-expansion", self._on_info_json_changed)
 
-        if self.settings.info_json_path:
-            self.json_path_button.set_label(f"{pathlib.Path(self.settings.info_json_path).name} ")
-        else:
-            self.json_path_button.set_label("(None) ")
-        self.json_path_button.connect("clicked", self._on_json_path_button_clicked)
+        json_button = FileChooserButton(
+            label=self.settings.info_json_path,
+            title="Save Info JSON",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE,
+        )
+        json_button.connect("clicked", self._on_json_path_button_clicked)
+        self.json_action_row.add(json_button)
 
     def _update_quality_widgets(self):
         # Video download
@@ -294,50 +310,21 @@ class PreferenceWindow(Handy.PreferencesWindow):
         self.video_row.set_sensitive(not self.settings.download_share_version)
         self.audio_row.set_sensitive(not self.settings.download_share_version)
 
-    def _on_archive_path_button_clicked(self, button):
-        dialog = Gtk.FileChooserNative.new(
-            "Save Archive File",
-            self,
-            Gtk.FileChooserAction.SAVE,
-            None,
-            None
-        )
+    def _on_archive_path_button_clicked(self, dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            self.settings.archive_path = dialog_button.filename
 
-        # FileChooserNative doesn't have any signals, only the returned response
-        if dialog.run() == Gtk.ResponseType.ACCEPT:
-            self.settings.archive_path = dialog.get_filename()
-            button.set_label(f"{pathlib.Path(self.settings.archive_path).name} ")
+    def _on_output_list_path_button_clicked(self, dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            self.settings.output_list_path = dialog_button.filename
 
-    def _on_output_list_path_button_clicked(self, button):
-        dialog = Gtk.FileChooserNative.new(
-            "Save Link List",
-            self,
-            Gtk.FileChooserAction.SAVE,
-            None,
-            None
-        )
+    def _on_json_path_button_clicked(self, dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            self.settings.info_json_path = dialog_button.filename
 
-        # FileChooserNative doesn't have any signals, only the returned response
-        if dialog.run() == Gtk.ResponseType.ACCEPT:
-            self.settings.output_list_path = dialog.get_filename()
-            button.set_label(f"{pathlib.Path(self.settings.output_list_path).name} ")
-
-    def _on_json_path_button_clicked(self, button):
-        dialog = Gtk.FileChooserNative.new(
-            "Save Info JSON",
-            self,
-            Gtk.FileChooserAction.SAVE,
-            None,
-            None
-        )
-
-        # FileChooserNative doesn't have any signals, only the returned response
-        if dialog.run() == Gtk.ResponseType.ACCEPT:
-            self.settings.info_json_path = dialog.get_filename()
-            button.set_label(f"{pathlib.Path(self.settings.info_json_path).name} ")
-
-    def _on_path_changed(self, chooser):
-        self.settings.output_path = chooser.get_filename()
+    def _on_output_button_clicked(self, dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            self.settings.output_path = dialog_button.filename
 
     def _on_container_changed(self, combo_row, prop_name):
         self.settings.file_extension = combo_row.get_selected_index()

@@ -40,7 +40,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="box">
             <property name="margin-start">18</property>
             <property name="margin-end">18</property>
             <property name="margin-top">18</property>
@@ -74,9 +74,8 @@
               </object>
             </child>
             <child>
-              <object class="GtkFileChooserButton" id="file_chooser">
-                <property name="no-show-all">True</property>
-                <property name="title" translatable="yes">Open Input List</property>
+              <object class="GtkButton" id="placeholder">
+                <property name="label" translatable="yes">Browse...</property>
               </object>
             </child>
             <child>

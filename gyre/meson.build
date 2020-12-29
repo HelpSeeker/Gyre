@@ -34,6 +34,7 @@ interface_sources = [
   'interface' / 'dialogs.py',
   'interface' / 'preferences.py',
   'interface' / 'row.py',
+  'interface' / 'widgets.py',
   'interface' / 'window.py',
 ]
 

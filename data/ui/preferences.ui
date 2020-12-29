@@ -27,17 +27,9 @@
           <object class="HdyPreferencesGroup">
             <property name="title" translatable="yes">Location</property>
             <child>
-              <object class="HdyActionRow">
+              <object class="HdyActionRow" id="output_action_row">
                 <property name="title" translatable="yes">Output Directory</property>
-                <property name="activatable-widget">path_chooser</property>
                 <property name="subtitle" translatable="yes">Where to save downloaded files</property>
-                <child>
-                  <object class="GtkFileChooserButton" id="path_chooser">
-                    <property name="valign">center</property>
-                    <property name="action">select-folder</property>
-                    <property name="title" translatable="yes">Choose Output Directory</property>
-                  </object>
-                </child>
               </object>
             </child>
             <child>
@@ -287,17 +279,8 @@
                 <property name="subtitle" translatable="yes">Keep track of downloaded coubs in an archive file</property>
                 <property name="show-enable-switch">True</property>
                 <child>
-                  <object class="HdyActionRow">
+                  <object class="HdyActionRow" id="archive_action_row">
                     <property name="title" translatable="yes">Save as...</property>
-                    <child>
-                      <object class="GtkButton" id="archive_path_button">
-                        <property name="valign">center</property>
-                        <property name="label" translatable="yes">(None) </property>
-                        <property name="image">save_button_img1</property>
-                        <property name="image-position">right</property>
-                        <property name="always-show-image">True</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
@@ -308,17 +291,8 @@
                 <property name="subtitle" translatable="yes">Output parsed links instead of downloading them</property>
                 <property name="show-enable-switch">True</property>
                 <child>
-                  <object class="HdyActionRow">
+                  <object class="HdyActionRow" id="output_list_action_row">
                     <property name="title" translatable="yes">Save as...</property>
-                    <child>
-                      <object class="GtkButton" id="output_list_path_button">
-                        <property name="valign">center</property>
-                        <property name="label" translatable="yes">(None) </property>
-                        <property name="image">save_button_img2</property>
-                        <property name="image-position">right</property>
-                        <property name="always-show-image">True</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
@@ -329,17 +303,8 @@
                 <property name="subtitle" translatable="yes">Save additional coub infos</property>
                 <property name="show-enable-switch">True</property>
                 <child>
-                  <object class="HdyActionRow">
+                  <object class="HdyActionRow" id="json_action_row">
                     <property name="title" translatable="yes">Save as...</property>
-                    <child>
-                      <object class="GtkButton" id="json_path_button">
-                        <property name="valign">center</property>
-                        <property name="label" translatable="yes">(None) </property>
-                        <property name="image">save_button_img3</property>
-                        <property name="image-position">right</property>
-                        <property name="always-show-image">True</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>

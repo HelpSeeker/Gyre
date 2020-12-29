@@ -21,6 +21,7 @@ from gi.repository import Gtk, Handy
 
 from gyre.utils import translate_community_name
 from gyre.core.container import create_container
+from gyre.interface.widgets import FileChooserButton
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -75,11 +76,12 @@ class AddWindow(Handy.Window):
 
     back_button = Gtk.Template.Child("back_button")
     add_button = Gtk.Template.Child("add_button")
+    box = Gtk.Template.Child("box")
     type_dropdown = Gtk.Template.Child("type_dropdown")
     entry_label = Gtk.Template.Child("entry_label")
     id_entry = Gtk.Template.Child("id_entry")
     community_dropdown = Gtk.Template.Child("community_dropdown")
-    file_chooser = Gtk.Template.Child("file_chooser")
+    list_button = Gtk.Template.Child("placeholder")
     sort_dropdown = Gtk.Template.Child("sort_dropdown")
     limit_spin_button = Gtk.Template.Child("limit_spin_button")
 
@@ -252,6 +254,17 @@ class AddWindow(Handy.Window):
         if self.item:
             self.add_button.set_label("Update")
 
+        self.box.remove(self.list_button)
+        self.list_button = FileChooserButton(
+            label=None,
+            title="Open Input List",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN,
+        )
+        self.list_button.set_no_show_all(True)
+        self.box.add(self.list_button)
+        self.box.reorder_child(self.list_button, 5)
+
         self.limit_spin_button.set_adjustment(
             Gtk.Adjustment(
                 value=self.limit,
@@ -267,7 +280,7 @@ class AddWindow(Handy.Window):
         self.type_dropdown.connect("notify::active", self._on_type_changed)
         self.id_entry.connect("notify::text", self._on_entry_changed)
         self.community_dropdown.connect("changed", self._on_community_changed)
-        self.file_chooser.connect("file-set", self._on_file_chosen)
+        self.list_button.connect("clicked", self._on_list_button_clicked)
         self.sort_dropdown.connect("notify::active", self._on_sort_changed)
         self.limit_spin_button.connect("value-changed", self._on_spin_button_changed)
 
@@ -294,20 +307,20 @@ class AddWindow(Handy.Window):
         if self.type == "List":
             self.id_entry.hide()
             self.community_dropdown.hide()
-            self.file_chooser.show()
+            self.list_button.show()
 
             # Don't set default file, unless ID is an existing path
             if self.id and os.path.isfile(self.id):
-                self.file_chooser.set_filename(self.id)
+                self.list_button.label = self.id
         elif self.type == "Community":
             self.id_entry.hide()
-            self.file_chooser.hide()
+            self.list_button.hide()
             self.community_dropdown.show()
 
             if self.id and self.id in self.SUPPORTED_FORMATS[self.type]["values"]:
                 self.community_dropdown.set_active(self.SUPPORTED_FORMATS[self.type]["values"][self.id])
         else:
-            self.file_chooser.hide()
+            self.list_button.hide()
             self.community_dropdown.hide()
             self.id_entry.show()
             self.id_entry.set_sensitive(self.SUPPORTED_FORMATS[self.type]["need_id"])
@@ -337,9 +350,10 @@ class AddWindow(Handy.Window):
         self.id = translate_community_name(dropdown.get_active_text(), direction="to_api")
         self._update_add_button()
 
-    def _on_file_chosen(self, *args):
-        self.id = self.file_chooser.get_filename()
-        self._update_add_button()
+    def _on_list_button_clicked(self, dialog_button):
+        if dialog_button.run() == Gtk.ResponseType.ACCEPT:
+            self.id = dialog_button.filename
+            self._update_add_button()
 
     def _on_sort_changed(self, *args):
         self.sort = self.sort_dropdown.get_active_text()
