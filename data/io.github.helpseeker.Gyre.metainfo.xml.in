@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2020 HelpSeeker <AlmostSerious@protonmail.ch> -->
+<!-- Copyright @COPYRIGHT@ @AUTHOR@ <@EMAIL@> -->
 <component type="desktop-application">
-  <id>io.github.helpseeker.Gyre</id>
+  <id>@DOMAIN@</id>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>GPL-3.0-or-later</project_license>
-  <name>Gyre</name>
+  <project_license>@LICENSE@</project_license>
+  <name>@NAME@</name>
   <content_rating type="oars-1.1" />
-  <summary>Download videos from Coub</summary>
+  <summary>@DESCRIPTION@</summary>
   <description>
     <p>Gyre is a GTK3 downloader for videos from Coub.</p>
     <p>What you can download with Gyre:</p>
@@ -23,7 +23,7 @@
     <p>Ready to use on desktop and mobile.</p>
   </description>
 
-  <launchable type="desktop-id">io.github.helpseeker.Gyre.desktop</launchable>
+  <launchable type="desktop-id">@DOMAIN@.desktop</launchable>
 
   <screenshots>
       <screenshot type="default">
@@ -34,15 +34,15 @@
       </screenshot>
   </screenshots>
 
-  <url type="homepage">https://github.com/HelpSeeker/Gyre</url>
-  <url type="bugtracker">https://github.com/HelpSeeker/Gyre/issues</url>
-  <developer_name>HelpSeeker</developer_name>
-  <update_contact>AlmostSerious_AT_protonmail.ch</update_contact>
+  <url type="homepage">@WEBSITE@</url>
+  <url type="bugtracker">@WEBSITE@/issues</url>
+  <developer_name>@AUTHOR@</developer_name>
+  <update_contact>@EMAIL@</update_contact>
 
   <releases>
     <release version="0.1.0" date="2020-12-24">
       <description>
-        <p>First Release</p>
+        <p>First Release.</p>
       </description>
     </release>
   </releases>

@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=Gyre
-Comment=Download videos from Coub
-Exec=gyre
-Icon=io.github.helpseeker.Gyre
+Name=@NAME@
+Comment=@DESCRIPTION@
+Exec=@EXEC@
+Icon=@DOMAIN@
 Terminal=false
 Type=Application
 StartupNotify=true

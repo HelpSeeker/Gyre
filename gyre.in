@@ -1,43 +1,37 @@
 #!@PYTHON@
 
-# Copyright (C) 2020 HelpSeeker <AlmostSerious@protonmail.ch>
+# Copyright (C) @COPYRIGHT@ @AUTHOR@ <@EMAIL@>
 #
-# This file is part of Gyre.
+# This file is part of @NAME@.
 #
-# Gyre is free software: you can redistribute it and/or modify
+# @NAME@ is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Gyre is distributed in the hope that it will be useful,
+# @NAME@ is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Gyre.  If not, see <https://www.gnu.org/licenses/>.
+# along with @NAME@.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 import sys
 import signal
-import gettext
 
-VERSION = '@VERSION@'
-pkgdatadir = '@pkgdatadir@'
-localedir = '@localedir@'
-
-sys.path.insert(1, pkgdatadir)
+sys.path.insert(1, '@MODULEDIR@')
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-gettext.install('gyre', localedir)
 
 if __name__ == '__main__':
     import gi
-
     from gi.repository import Gio
-    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'gyre.gresource'))
+
+    resource = Gio.Resource.load(os.path.join('@PKGDATADIR@', '@DOMAIN@.gresource'))
     resource._register()
 
-    from gyre.application import Application
+    from @MODULE@.application import Application
 
     app = Application()
     sys.exit(app.run(sys.argv))

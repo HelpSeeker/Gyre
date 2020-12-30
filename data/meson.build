@@ -1,55 +1,88 @@
-pkgdatadir = get_option('prefix') / get_option('datadir') / meson.project_name()
-desktopfiledir = get_option('datadir') / 'applications'
-appdatadir = get_option('datadir') / 'metainfo'
-schemadir = get_option('datadir') / 'glib-2.0' / 'schemas'
-icondir = get_option('datadir') / 'icons' / 'hicolor'
+# Configure, validate and install desktop file
+desktop_conf = configuration_data()
+desktop_conf.set('NAME', name)
+desktop_conf.set('DESCRIPTION', description)
+desktop_conf.set('EXEC', meson.project_name())
+desktop_conf.set('DOMAIN', domain)
 
-desktopfile = 'io.github.helpseeker.Gyre.desktop'
-appdata = 'io.github.helpseeker.Gyre.metainfo.xml'
-schema = 'io.github.helpseeker.Gyre.gschema.xml'
-appicon = 'icons' / 'io.github.helpseeker.Gyre.svg'
-symbolicicon = 'icons' / 'io.github.helpseeker.Gyre-symbolic.svg'
+desktop_file = configure_file(
+  input: domain + '.desktop.in',
+  output: domain + '.desktop',
+  configuration: desktop_conf,
+)
 
+desktop_util = find_program('desktop-file-validate', required: false)
+if desktop_util.found()
+  test('Test desktop file', desktop_util, args: [desktop_file])
+endif
+
+install_data(desktop_file, install_dir: desktop_file_dir)
+
+# Configure, validate and install metainfo file (aka appdata)
+metainfo_conf = configuration_data()
+metainfo_conf.set('COPYRIGHT', copyright)
+metainfo_conf.set('AUTHOR', author)
+metainfo_conf.set('EMAIL', email)
+metainfo_conf.set('DOMAIN', domain)
+metainfo_conf.set('LICENSE', meson.project_license()[0])
+metainfo_conf.set('NAME', name)
+metainfo_conf.set('DESCRIPTION', description)
+metainfo_conf.set('WEBSITE', website)
+
+metainfo = configure_file(
+  input: domain + '.metainfo.xml.in',
+  output: domain + '.metainfo.xml',
+  configuration: metainfo_conf,
+)
+
+metainfo_util = find_program('appstream-util', required: false)
+if metainfo_util.found()
+  test('Test metainfo', metainfo_util, args: ['validate', metainfo])
+endif
+
+install_data(metainfo, install_dir: metainfo_dir)
+
+# Install and validate gsettings schema
+schema_conf = configuration_data()
+schema_conf.set('DOMAIN', domain)
+schema_conf.set('PATH', '/'.join(domain.split('.')))
+
+schema = configure_file(
+  input: domain + '.gschema.xml.in',
+  output: domain + '.gschema.xml',
+  configuration: schema_conf,
+)
+
+glib_compile = find_program('glib-compile-schemas', required: false)
+if glib_compile.found()
+  test('Test schema', glib_compile, args: ['--strict', '--dry-run', meson.current_source_dir()])
+endif
+
+install_data(schema, install_dir: schema_dir)
+
+# Configure about dialog UI file (final configuration done during gresource compiling)
+about_conf = configuration_data()
+about_conf.set('NAME', name)
+about_conf.set('VERSION', meson.project_version())
+about_conf.set('DOMAIN', domain)
+about_conf.set('DESCRIPTION', description)
+about_conf.set('LICENSE', license)
+about_conf.set('WEBSITE', website)
+about_conf.set('AUTHOR', author)
+about_conf.set('COPYRIGHT', copyright)
+
+# Compile and install gresource file
 gnome = import('gnome')
-
-# Gresources
-gnome.compile_resources('gyre',
-  'gyre.gresource.xml',
+gnome.compile_resources(domain,
+  domain + '.gresource.xml',
   gresource_bundle: true,
+  dependencies: configure_file(
+      input: 'ui' / 'about.ui.in',
+      output: 'about.ui',
+      configuration: about_conf
+  ),
   install: true,
   install_dir: pkgdatadir,
 )
 
-# Desktop file
-install_data(desktopfile, install_dir: desktopfiledir)
-
-desktop_utils = find_program('desktop-file-validate', required: false)
-if desktop_utils.found()
-  test('Validate desktop file', desktop_utils,
-    args: [desktopfiledir / desktopfile]
-  )
-endif
-
-# Appdata
-install_data(appdata, install_dir: appdatadir)
-
-appstream_util = find_program('appstream-util', required: false)
-if appstream_util.found()
-  test('Validate appstream file', appstream_util,
-    args: ['validate-relax', appdatadir / appdata]
-  )
-endif
-
-# GSettings schema
-install_data(schema, install_dir: schemadir)
-
-compile_schemas = find_program('glib-compile-schemas', required: false)
-if compile_schemas.found()
-  test('Validate schema file', compile_schemas,
-    args: ['--strict', '--dry-run', meson.current_source_dir()]
-  )
-endif
-
-# Icons
-install_data(appicon, install_dir: icondir / 'scalable' / 'apps')
-install_data(symbolicicon, install_dir: icondir / 'symbolic' / 'apps')
+subdir('icons')

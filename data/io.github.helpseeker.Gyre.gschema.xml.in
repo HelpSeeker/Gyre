@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="gyre">
+<schemalist>
   <!-- TODO: Set limits and other restrictions -->
-  <enum id="FileExtension">
+  <enum id="@DOMAIN@.FileExtension">
     <value nick="mkv" value="0" />
     <value nick="mp4" value="1" />
     <value nick="asf" value="2" />
@@ -10,31 +10,31 @@
     <value nick="f4v" value="5" />
     <value nick="mov" value="6" />
   </enum>
-  <enum id="VideoResolution">
+  <enum id="@DOMAIN@.VideoResolution">
     <value nick="Lowest" value="0" />
     <value nick="Highest" value="-1" />
   </enum>
-  <enum id="MaxVideoResolution">
+  <enum id="@DOMAIN@.MaxVideoResolution">
     <value nick="640x480" value="0" />
     <value nick="1280x960" value="1" />
     <value nick="1600x1200" value="2" />
   </enum>
-  <enum id="MinVideoResolution">
+  <enum id="@DOMAIN@.MinVideoResolution">
     <value nick="640x480" value="0" />
     <value nick="1280x960" value="1" />
     <value nick="1600x1200" value="2" />
   </enum>
-  <enum id="AudioQuality">
+  <enum id="@DOMAIN@.AudioQuality">
     <value nick="Worst" value="0" />
     <value nick="Best" value="-1" />
   </enum>
-  <enum id="DownloadRecoubs">
+  <enum id="@DOMAIN@.DownloadRecoubs">
     <value nick="No Recoubs" value="0" />
     <value nick="With Recoubs" value="1" />
     <value nick="Only Recoubs" value="2" />
   </enum>
 
-  <schema id="io.github.helpseeker.Gyre" path="/io/github/helpseeker/Gyre/">
+  <schema id="@DOMAIN@" path="/@PATH@/">
     <key type="s" name="output-path">
       <default>''</default>
       <summary>Output directory</summary>
@@ -42,7 +42,7 @@
         Directory to save downloaded coubs in
       </description>
     </key>
-    <key enum="FileExtension" name="file-extension">
+    <key enum="@DOMAIN@.FileExtension" name="file-extension">
       <default>'mkv'</default>
       <summary>Output Extension</summary>
       <description>
@@ -103,21 +103,21 @@
         Whether to download video streams
       </description>
     </key>
-    <key enum="VideoResolution" name="video-resolution">
+    <key enum="@DOMAIN@.VideoResolution" name="video-resolution">
       <default>'Highest'</default>
       <summary>Video Resolution</summary>
       <description>
         Whether to prefer the highest or lowest available video resolution
       </description>
     </key>
-    <key enum="MaxVideoResolution" name="max-video-resolution">
+    <key enum="@DOMAIN@.MaxVideoResolution" name="max-video-resolution">
       <default>'1600x1200'</default>
       <summary>Max. video resolution</summary>
       <description>
         The highest video resolution considered for download
       </description>
     </key>
-    <key enum="MinVideoResolution" name="min-video-resolution">
+    <key enum="@DOMAIN@.MinVideoResolution" name="min-video-resolution">
       <default>'640x480'</default>
       <summary>Min. video resolution</summary>
       <description>
@@ -131,7 +131,7 @@
         Whether to download audio streams
       </description>
     </key>
-    <key enum="AudioQuality" name="audio-quality">
+    <key enum="@DOMAIN@.AudioQuality" name="audio-quality">
       <default>'Best'</default>
       <summary>Audio quality</summary>
       <description>
@@ -169,7 +169,7 @@
         0 for infinite coubs
       </description>
     </key>
-    <key enum="DownloadRecoubs" name="download-recoubs">
+    <key enum="@DOMAIN@.DownloadRecoubs" name="download-recoubs">
       <default>'With Recoubs'</default>
       <summary>Download Recoubs</summary>
       <description>
@@ -243,7 +243,7 @@
       <default>true</default>
       <summary>First Application Start</summary>
       <description>
-        Whether Gyre is being launched for the first time
+        Whether the program is launched for the first time
       </description>
     </key>
   </schema>

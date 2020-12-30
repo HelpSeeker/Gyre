@@ -186,6 +186,6 @@ class WelcomeScreen(Handy.Window):
         self.destroy()
 
 
-@Gtk.Template(resource_path="/io/github/helpseeker/Gyre/ui/about.ui")
+@Gtk.Template(resource_path="/io/github/helpseeker/Gyre/about.ui")
 class AboutDialog(Gtk.AboutDialog):
     __gtype_name__ = "AboutDialog"
