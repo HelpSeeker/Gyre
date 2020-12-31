@@ -18,7 +18,7 @@
 from gi.repository import Gtk, GLib
 
 from gyre.utils import translate_community_name
-from gyre.core.settings import Settings
+from gyre.settings import Settings
 from gyre.interface.add import AddWindow
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

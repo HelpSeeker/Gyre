@@ -30,9 +30,9 @@ gi.require_version("Handy", "1")
 from gi.repository import Gtk, Gio, Handy, GLib, GObject
 
 from gyre import utils
-from gyre.core.container import cancel_containers, uncancel_containers
-from gyre.core.coub import Coub, cancel_coubs, uncancel_coubs
-from gyre.core.settings import Settings
+from gyre.container import cancel_containers, uncancel_containers
+from gyre.coub import Coub, cancel_coubs, uncancel_coubs
+from gyre.settings import Settings
 from gyre.interface.add import AddURLWindow, AddWindow
 from gyre.interface.window import GyreWindow
 from gyre.interface.preferences import PreferenceWindow

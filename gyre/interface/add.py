@@ -20,7 +20,7 @@ import os
 from gi.repository import Gtk, Handy
 
 from gyre.utils import translate_community_name
-from gyre.core.container import create_container
+from gyre.container import create_container
 from gyre.interface.widgets import FileChooserButton
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

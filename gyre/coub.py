@@ -25,7 +25,7 @@ import unicodedata
 from aiohttp import ClientError
 
 from gyre import utils
-from gyre.core.settings import Settings
+from gyre.settings import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables

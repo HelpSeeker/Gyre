@@ -17,7 +17,7 @@
 
 from gi.repository import Gtk, Gio, Handy
 
-from gyre.core.container import BaseContainer
+from gyre.container import BaseContainer
 from gyre.interface.row import InputRow
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

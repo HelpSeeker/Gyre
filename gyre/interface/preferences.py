@@ -19,7 +19,7 @@ import pathlib
 
 from gi.repository import Gtk, Gio, Handy
 
-from gyre.core.settings import Settings
+from gyre.settings import Settings
 from gyre.interface.widgets import FileChooserButton
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

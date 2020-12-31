@@ -22,7 +22,7 @@ import time
 
 from gi.repository import GLib
 
-from gyre.core.settings import Settings
+from gyre.settings import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -80,7 +80,7 @@ def write_error_log(error):
 
 
 def import_profile(path, liststore):
-    from gyre.core.container import create_container
+    from gyre.container import create_container
 
     with path.open("r") as f:
         content = json.load(f)

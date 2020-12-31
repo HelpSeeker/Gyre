@@ -29,7 +29,7 @@ from aiohttp import ClientError
 from gi.repository import GObject
 
 from gyre.utils import CancelledError, write_error_log
-from gyre.core.settings import Settings
+from gyre.settings import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables

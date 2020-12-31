@@ -18,7 +18,7 @@
 from gi.repository import Gtk, Handy
 
 from gyre.utils import get_error_log
-from gyre.core.settings import Settings
+from gyre.settings import Settings
 from gyre.interface.widgets import FileChooserButton
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
