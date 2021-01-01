@@ -75,26 +75,24 @@ Gyre is mobile-ready thanks to libhandy, but there are issues with GTK 3, which 
 
 ## Gyre on Windows
 
-It is my goal to bring Gyre to Windows as a portable build like CoubDownloader, but GTK and other GNOME technologies like GSettings don't make things easy.
+It is my goal to bring Gyre to Windows, but GTK and other GNOME technologies make it difficult to provide portable builds.
 
-Support is very very alpha, but you can make it somewhat work with the following steps:
+Support is very very alpha, but you can still try it out by following these steps:
 
 1. [Install msys2](https://www.msys2.org/)
 2. Run `mingw64` in the command prompt, Powershell, etc.
 
-Switch to the mingw64 terminal and continue:
+Switch to the mingw64 terminal and continue...
 
 3. `pacman -S mingw-w64-x86_64-python mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python-aiohttp mingw-w64-x86_64-python-gobject mingw-w64-x86_64-meson mingw-w64-x86_64-pkgconf mingw-w64-x86_64-cmake mingw-w64-x86_64-libhandy`
-4. ~~`pacman -S mingw-w64-x86_64-ffmpeg`~~ (merging doesn't work currently)
+4. ~~`pacman -S mingw-w64-x86_64-ffmpeg`~~ (merging doesn't work yet)
 5. Download or clone repository
 6. `cd` into the project folder 
-7. `meson --prefix=$(pwd)/install build .`
+7. `meson build .`
 8. `cd build`
 9. `ninja install`
-10. `cd ../install`
-11. `glib-compile-schemas.exe share/glib-2.0/schemas` (has to be done manually as the post-setup script currently fails)
-12. `GSETTINGS_SCHEMA_DIR=share/glib-2.0/schemas/ python bin/gyre`
+10. `gyre`
 
-Icons don't work. Neither does stream merging, so you should only download share versions for now.
+Stream merging is broken, so you can only download share versions or individual streams for now.
 
 Still, if you want to test it, any feedback is very welcome.
