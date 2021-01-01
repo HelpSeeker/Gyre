@@ -40,7 +40,14 @@ CANCELLED = False
 class CoubUnavailableError(Exception):
     pass
 
+
 class CoubExistsError(Exception):
+
+    def __init__(self, path):
+        self.path = path
+
+
+class CoubCorruptedError(Exception):
 
     def __init__(self, path):
         self.path = path
@@ -206,6 +213,16 @@ class Coub:
         if self.audio:
             self.audio_file.with_suffix(f"{self.audio_file.suffix}.gyre").replace(self.audio_file)
 
+    def _check_integrity(self):
+        if self.video and file_corrupted(self.video_file):
+            fix_old_storage_method(self.video_file)
+            # Video files have a chance of being fixed, so check again
+            if file_corrupted(self.video_file):
+                raise CoubCorruptedError(self.video_file)
+
+        if self.audio and file_corrupted(self.audio_file):
+            raise CoubCorruptedError(self.audio_file)
+
     def _merge_streams(self):
         # temp_file uses prefix to not mess with FFmpeg's automatic muxer detection
         temp_file = pathlib.Path(self.merged_file.parent, f"temp_{self.merged_file.name}")
@@ -243,6 +260,7 @@ class Coub:
                     await self._fetch_infos()
                 self._check_existence()
                 await self._download()
+                self._check_integrity()
                 if self.audio and self.video and not Settings.get_default().download_share_version:
                     self._merge_streams()
                 if Settings.get_default().archive:
@@ -259,6 +277,10 @@ class Coub:
             except CoubExistsError as error:
                 utils.write_error_log(f"{error.path.name} already exists")
                 self.container.exist += 1
+                break
+            except CoubCorruptedError as error:
+                utils.write_error_log(f"{error.path.name} corrupted")
+                self.container.invalid += 1
                 break
 
         self._finish()
@@ -395,3 +417,34 @@ async def save_stream(link, path, session):
                 if not chunk:
                     break
                 f.write(chunk)
+
+
+def fix_old_storage_method(path):
+    # Coub used to store videos in a broken state and fixed them before playback
+    # They stopped doing this when they introduced the watermarks
+    # Some old coubs might still be stored like this
+    with path.open("r+b") as f:
+        temp = f.read()
+    with path.open("w+b") as f:
+        f.write(b'\x00\x00' + temp[2:])
+
+
+def file_corrupted(path):
+    command = ["ffmpeg", "-v", "error", "-i", str(path), "-t", "1", "-f", "null", "-"]
+    out = subprocess.run(command, capture_output=True, text=True, check=False)
+
+    # Checks against typical error messages
+    # "Header missing"/"Failed to read frame size" -> audio corruption
+    # "Invalid NAL" -> video corruption
+    # "moov atom not found" -> old Coub storage method
+    typical = [
+        "Header missing",
+        "Failed to read frame size",
+        "Invalid NAL",
+        "moov atom not found",
+    ]
+    for error in typical:
+        if error in out.stderr:
+            return True
+
+    return False

@@ -30,11 +30,15 @@
                 "--enable-avcodec",
                 "--enable-avformat",
                 "--enable-avfilter",
+                "--enable-swresample",
                 "--enable-ffmpeg",
                 "--enable-protocol=file",
+                "--enable-decoder=h264,mp3",
+                "--enable-encoder=wrapped_avframe,pcm_s16le",
                 "--enable-demuxer=concat,mov,mp3",
-                "--enable-muxer=matroska,mp4,asf,avi,flv,f4v,mov",
-                "--enable-bsf=h264_mp4toannexb"
+                "--enable-muxer=matroska,mp4,asf,avi,flv,f4v,mov,null",
+                "--enable-bsf=h264_mp4toannexb",
+                "--enable-filter=aresample"
             ],
             "sources" : [
                 {
