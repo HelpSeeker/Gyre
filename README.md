@@ -72,3 +72,29 @@ Gyre tries to open the log with the default text editor. That doesn't work when 
 #### (Flatpak only) Dialogs exceed the boundaries of my phone display.
 
 Gyre is mobile-ready thanks to libhandy, but there are issues with GTK 3, which require [additional patches](https://gitlab.gnome.org/GNOME/gtk/-/issues/3411) to make it work correctly on mobile. Mobile distros apply these patches, but they don't affect Flatpaks. I'm still looking for a solution to this problem (maybe an additional Flatpak with the patches applied?), but until then you are better off running Gyre locally.
+
+## Gyre on Windows
+
+It is my goal to bring Gyre to Windows as a portable build like CoubDownloader, but GTK and other GNOME technologies like GSettings don't make things easy.
+
+Support is very very alpha, but you can make it somewhat work with the following steps:
+
+1. [Install msys2](https://www.msys2.org/)
+2. Run `mingw64` in the command prompt, Powershell, etc.
+
+Switch to the mingw64 terminal and continue:
+
+3. `pacman -S mingw-w64-x86_64-python mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python-aiohttp mingw-w64-x86_64-python-gobject mingw-w64-x86_64-meson mingw-w64-x86_64-pkgconf mingw-w64-x86_64-cmake mingw-w64-x86_64-libhandy`
+4. ~~`pacman -S mingw-w64-x86_64-ffmpeg`~~ (merging doesn't work currently)
+5. Download or clone repository
+6. `cd` into the project folder 
+7. `meson --prefix=$(pwd)/install build .`
+8. `cd build`
+9. `ninja install`
+10. `cd ../install`
+11. `glib-compile-schemas.exe share/glib-2.0/schemas` (has to be done manually as the post-setup script currently fails)
+12. `GSETTINGS_SCHEMA_DIR=share/glib-2.0/schemas/ python bin/gyre`
+
+Icons don't work. Neither does stream merging, so you should only download share versions for now.
+
+Still, if you want to test it, any feedback is very welcome.
