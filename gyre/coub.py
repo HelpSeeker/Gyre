@@ -19,6 +19,7 @@ import asyncio
 import json
 import pathlib
 import re
+import os
 import subprocess
 import unicodedata
 
@@ -230,7 +231,13 @@ class Coub:
 
         with concat_file.open("w") as f:
             for _ in range(Settings.get_default().loop_limit):
-                print(f"file '{self.video_file}'", file=f)
+                if os.name == "nt":
+                    # msys2's FFmpeg package alters filenames with the concat demuxer
+                    # Until the issue is resolved, only list the filenames
+                    # https://github.com/msys2/MINGW-packages/issues/7570
+                    print(f"file '{self.video_file.name}'", file=f)
+                else:
+                    print(f"file '{self.video_file}'", file=f)
 
         command = [
             "ffmpeg", "-y", "-v", "error",
