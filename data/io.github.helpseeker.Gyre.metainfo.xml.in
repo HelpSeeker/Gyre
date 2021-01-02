@@ -40,6 +40,28 @@
   <update_contact>@EMAIL@</update_contact>
 
   <releases>
+    <release version="0.1.1" date="2021-01-02">
+      <description>
+        <p>Additions:</p>
+        <ul>
+            <li>Initial start screen</li>
+            <li>Stream integrity check</li>
+            <li>Stream repair for old coubs</li>
+            <li>Windows support</li>
+        </ul>
+        <p>Changes:</p>
+        <ul>
+            <li>Switch from entry to dropdown list to choose communities</li>
+            <li>Pretty community names (as seen on the website) instead of internally used ones</li>
+            <li>Custom file chooser buttons (no more dropdown lists for folder selection)</li>
+            <li>Various code cleanups</li>
+        </ul>
+        <p>Fixes:</p>
+        <ul>
+            <li>Unknown errors during the download won't crash Gyre anymore</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2020-12-24">
       <description>
         <p>First Release.</p>
