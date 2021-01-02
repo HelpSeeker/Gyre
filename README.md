@@ -77,22 +77,23 @@ Gyre is mobile-ready thanks to libhandy, but there are issues with GTK 3, which 
 
 It is my goal to bring Gyre to Windows, but GTK and other GNOME technologies make it difficult to provide portable builds.
 
-Support is very very alpha, but you can still try it out by following these steps:
+Support is very alpha, but you can still install Gyre by following these steps:
 
 1. [Install msys2](https://www.msys2.org/)
 2. Run `mingw64` in the command prompt, Powershell, etc.
 
 Switch to the mingw64 terminal and continue...
 
-3. `pacman -S mingw-w64-x86_64-python mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python-aiohttp mingw-w64-x86_64-python-gobject mingw-w64-x86_64-meson mingw-w64-x86_64-pkgconf mingw-w64-x86_64-cmake mingw-w64-x86_64-libhandy`
-4. ~~`pacman -S mingw-w64-x86_64-ffmpeg`~~ (merging doesn't work yet)
-5. Download or clone repository
-6. `cd` into the project folder 
-7. `meson build .`
-8. `cd build`
-9. `ninja install`
-10. `gyre`
+3. `pacman -S mingw-w64-x86_64-python mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python-aiohttp mingw-w64-x86_64-python-gobject mingw-w64-x86_64-meson mingw-w64-x86_64-pkgconf mingw-w64-x86_64-cmake mingw-w64-x86_64-libhandy mingw-w64-x86_64-ffmpeg`
+4. Download or clone the repository
+5. `cd` into the project folder 
+6. `meson build .`
+7. `cd build`
+8. `ninja install`
+9. `gyre`
 
-Stream merging is broken, so you can only download share versions or individual streams for now.
+Once you have successfully installed Gyre, you can create a shortcut that points to the following command
 
-Still, if you want to test it, any feedback is very welcome.
+```msys2_shell.cmd -mingw64 -lc gyre```
+
+to open Gyre without having to start up a terminal. Depending on your setup you can also add `-defterm` (i.e. use the default terminal) to the command to speed up the launch.
