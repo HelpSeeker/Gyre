@@ -118,8 +118,3 @@ class InputRow(Gtk.ListBoxRow):
         else:
             self.progress_bar.set_text(self.item.status)
             self.progress_bar.set_sensitive(False)
-            if self.item.status.startswith("Error"):
-                # Stop watching for item signals after it has become invalid
-                # thaw_notify() will never be called as doing any changes to the item
-                # would create a new instance anyway
-                self.item.freeze_notify()

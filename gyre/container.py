@@ -59,7 +59,7 @@ class BaseContainer(GObject.GObject):
     # Attempts are done on a per-page level, but the attempt limit is for all pages
     attempt = 0
 
-    status = GObject.Property(type=str, default="")
+    status_value = ""
     page_progress = GObject.Property(type=int, default=0)
     done = GObject.Property(type=int, default=0)
 
@@ -77,6 +77,15 @@ class BaseContainer(GObject.GObject):
         self.id = urlunquote(id)
         self.sort = sort
         self.quantity = quantity
+
+    @GObject.Property(type=str)
+    def status(self):
+        return self.status_value
+
+    @status.setter
+    def status(self, value):
+        if not self.status.startswith("Error") or value == "Started":
+            self.status_value = value
 
     def _assemble_template(self):
         pass
