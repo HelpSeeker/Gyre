@@ -259,6 +259,7 @@ class Application(Gtk.Application):
         self._clean_up()
 
     def _on_idle_changed(self, *args):
+        self.window.add_button.set_sensitive(self.idle)
         for row in self.window.listbox:
             row.set_editable(self.idle)
 
