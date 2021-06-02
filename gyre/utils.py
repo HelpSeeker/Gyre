@@ -147,12 +147,15 @@ def translate_community_name(community, direction="to_ui"):
         "animals-pets": "Animals & Pets",
         "anime": "Anime",
         "art": "Art & Design",
+        "blogging": "Blogging",
         "cars": "Auto & Technique",
         "cartoons": "Cartoons",
         "celebrity": "Celebrity",
         "dance": "Dance",
         "fashion": "Fashion & Beauty",
+        "food-kitchen": "Food & Kitchen",
         "gaming": "Gaming",
+        "live-pictures": "Live Pictures",
         "mashup": "Mashup",
         "movies": "Movies & TV",
         "music": "Music",
@@ -161,6 +164,7 @@ def translate_community_name(community, direction="to_ui"):
         "nsfw": "NSFW",
         "science-technology": "Science & Technology",
         "sports": "Sports",
+        "standup-jokes": "Stand-up & Jokes",
     }
 
     if direction == "to_ui":
