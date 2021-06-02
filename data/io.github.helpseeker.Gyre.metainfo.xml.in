@@ -40,6 +40,18 @@
   <update_contact>@EMAIL@</update_contact>
 
   <releases>
+    <release version="0.1.2" date="2021-06-02">
+      <description>
+        <p>Additions:</p>
+        <ul>
+            <li>Support for new communities</li>
+        </ul>
+        <p>Changes:</p>
+        <ul>
+            <li>Updated dependencies</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.1" date="2021-01-02">
       <description>
         <p>Additions:</p>
