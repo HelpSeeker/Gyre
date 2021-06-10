@@ -205,6 +205,22 @@ class Settings(Gio.Settings):
         self.set_enum("download-recoubs", value)
 
     @property
+    def repeat_download(self):
+        return self.get_boolean("repeat-download")
+
+    @repeat_download.setter
+    def repeat_download(self, value):
+        self.set_boolean("repeat-download", value)
+
+    @property
+    def repeat_interval(self):
+        return self.get_int("repeat-interval")
+
+    @repeat_interval.setter
+    def repeat_interval(self, value):
+        self.set_int("repeat-interval", value)
+
+    @property
     def archive(self):
         return self.get_boolean("archive")
 

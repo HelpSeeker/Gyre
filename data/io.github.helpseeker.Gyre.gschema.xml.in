@@ -176,6 +176,20 @@
         How to treat recoubs during channel downloads
       </description>
     </key>
+    <key type="b" name="repeat-download">
+      <default>false</default>
+      <summary>Repeat Download</summary>
+      <description>
+        Periodically download all items (instead of only once)
+      </description>
+    </key>
+    <key type="i" name="repeat-interval">
+      <default>60</default>
+      <summary>Repeat Download Interval</summary>
+      <description>
+        How long to wait before starting a new download (in minutes)
+      </description>
+    </key>
     <key type="b" name="archive">
       <default>false</default>
       <summary>Use Archive</summary>

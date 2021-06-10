@@ -72,6 +72,10 @@ class PreferenceWindow(Handy.PreferencesWindow):
     quantity_spin_button = Gtk.Template.Child("quantity_spin_button")
     recoubs_row = Gtk.Template.Child("recoubs_row")
 
+    # Automatization
+    repeat_download_row = Gtk.Template.Child("repeat_download_row")
+    interval_spin_button = Gtk.Template.Child("interval_spin_button")
+
     ### Misc
 
     archive_row = Gtk.Template.Child("archive_row")
@@ -238,6 +242,22 @@ class PreferenceWindow(Handy.PreferencesWindow):
         self.recoubs_row.set_selected_index(self.settings.download_recoubs)
         self.recoubs_row.connect('notify::selected-index', self._on_recoubs_download_changed)
 
+        # Repeated Downloads
+        self.repeat_download_row.set_expanded(self.settings.repeat_download)
+        self.repeat_download_row.set_enable_expansion(self.settings.repeat_download)
+        self.repeat_download_row.connect("notify::enable-expansion", self._on_repeat_download_changed)
+
+        self.interval_spin_button.set_adjustment(
+            Gtk.Adjustment(
+                value=self.settings.repeat_interval,
+                lower=0,
+                upper=99999,
+                step_increment=1,
+                page_increment=10,
+            )
+        )
+        self.interval_spin_button.connect("notify::value", self._on_interval_changed)
+
     def _prepare_misc_widgets(self):
         # Archive
         self.archive_row.set_expanded(self.settings.archive)
@@ -389,6 +409,12 @@ class PreferenceWindow(Handy.PreferencesWindow):
 
     def _on_recoubs_download_changed(self, combo_row, prop_name):
         self.settings.download_recoubs = combo_row.get_selected_index()
+
+    def _on_repeat_download_changed(self, row, prop_name):
+        self.settings.repeat_download = row.get_enable_expansion()
+
+    def _on_interval_changed(self, spin_button, prop_name):
+        self.settings.repeat_interval = spin_button.get_value_as_int()
 
     def _on_archive_changed(self, row, prop_name):
         self.settings.archive = row.get_enable_expansion()

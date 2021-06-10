@@ -46,6 +46,9 @@ from gyre.interface import dialogs
 # Prevents excessive RAM usage for very large downloads
 COUB_LIMIT = 1000
 
+# To signal cancellation to the work thread
+CANCELLED = False
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,12 +254,16 @@ class Application(Gtk.Application):
         thread.start()
 
     def do_stop_download(self, *args):
+        global CANCELLED
+
         cancel_containers()
         cancel_coubs()
+        CANCELLED = True
         # Stall until the work thread finished
         while not self.idle:
             time.sleep(0.1)
         self._clean_up()
+        CANCELLED = False
 
     def _on_idle_changed(self, *args):
         self.window.add_button.set_sensitive(self.idle)
@@ -273,68 +280,82 @@ class Application(Gtk.Application):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 async def process(model):
-    ids = set()
-    coubs = []
+    while True:
+        ids = set()
+        coubs = []
 
-    quantity = None
-    if Settings.get_default().quantity_limit:
-        quantity = Settings.get_default().quantity_limit
+        quantity = None
+        if Settings.get_default().quantity_limit:
+            quantity = Settings.get_default().quantity_limit
 
-    archive_content = set()
-    if Settings.get_default().archive:
-        archive = pathlib.Path(Settings.get_default().archive_path)
-        if archive.exists():
-            archive_content = set(archive.read_text().splitlines())
+        archive_content = set()
+        if Settings.get_default().archive:
+            archive = pathlib.Path(Settings.get_default().archive_path)
+            if archive.exists():
+                archive_content = set(archive.read_text().splitlines())
 
-    tout = aiohttp.ClientTimeout(total=None)
-    conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
-    async with aiohttp.ClientSession(timeout=tout, connector=conn) as session:
-        for item in model:
-            item.status = "Started"
-            item.reset()
-
-        try:
+        tout = aiohttp.ClientTimeout(total=None)
+        conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
+        async with aiohttp.ClientSession(timeout=tout, connector=conn) as session:
             for item in model:
-                item.status = "Parsing"
-                temp = await item.get_ids(session, quantity)
-                # Weed out duplicates and already downloaded IDs
-                temp = [i for i in temp if not (i in ids or i in archive_content)]
-                # Adjust container count based on filtered ID list
-                item.count = len(temp)
-                if temp:
-                    coubs.extend([Coub(i, item, session) for i in temp])
-                    # Ugly, but we want to keep it a set for faster lookup
-                    ids = list(ids)
-                    ids.extend(temp)
-                    ids = set(ids)
-                if quantity is not None:
-                    quantity -= len(temp)
-                item.status = "Waiting"
+                item.status = "Started"
+                item.reset()
 
-            # Marking containers as finished while parsing is problematic
-            # Users could clean them up (i.e. remove them) and mess up the list order
-            for item in model:
+            try:
+                for item in model:
+                    item.status = "Parsing"
+                    temp = await item.get_ids(session, quantity)
+                    # Weed out duplicates and already downloaded IDs
+                    temp = [i for i in temp if not (i in ids or i in archive_content)]
+                    # Adjust container count based on filtered ID list
+                    item.count = len(temp)
+                    if temp:
+                        coubs.extend([Coub(i, item, session) for i in temp])
+                        # Ugly, but we want to keep it a set for faster lookup
+                        ids = list(ids)
+                        ids.extend(temp)
+                        ids = set(ids)
+                    if quantity is not None:
+                        quantity -= len(temp)
+                    item.status = "Waiting"
+
+                # Marking containers as finished while parsing is problematic
+                # Users could clean them up (i.e. remove them) and mess up the list order
+                for item in model:
+                    if Settings.get_default().output_list:
+                        item.status = "Finished"
+                    elif not item.count:
+                        item.status = "No new coubs"
+                    else:
+                        item.status = "Downloading"
+
                 if Settings.get_default().output_list:
-                    item.status = "Finished"
-                elif not item.count:
-                    item.status = "No new coubs"
-                else:
-                    item.status = "Downloading"
+                    links = [f"https://coub.com/view/{coub.id}" for coub in coubs]
+                    pathlib.Path(Settings.get_default().output_list_path).write_text("\n".join(links))
+                    return
 
-            if Settings.get_default().output_list:
-                links = [f"https://coub.com/view/{coub.id}" for coub in coubs]
-                pathlib.Path(Settings.get_default().output_list_path).write_text("\n".join(links))
-                return
+                while coubs:
+                    tasks = [c.process() for c in coubs[:COUB_LIMIT]]
+                    await asyncio.gather(*tasks)
+                    coubs = coubs[COUB_LIMIT:]
+            except utils.CancelledError:
+                for item in model:
+                    item.status = "Cancelled"
+                break
+            except:
+                for item in model:
+                    item.status = "Error: Unknown error"
+                error = traceback.format_exc()
+                utils.write_error_log(error)
+                break
 
-            while coubs:
-                tasks = [c.process() for c in coubs[:COUB_LIMIT]]
-                await asyncio.gather(*tasks)
-                coubs = coubs[COUB_LIMIT:]
-        except utils.CancelledError:
-            for item in model:
-                item.status = "Cancelled"
-        except:
-            for item in model:
-                item.status = "Error: Unknown error"
-            error = traceback.format_exc()
-            utils.write_error_log(error)
+        if Settings.get_default().repeat_download:
+            for timer in range(Settings.get_default().repeat_interval, 0, -1):
+                for item in model:
+                    item.status = f"Waiting to start next download ({timer} min. remaining)"
+                for _ in range(120):
+                    if CANCELLED:
+                        break
+                    time.sleep(0.5)
+        else:
+            break

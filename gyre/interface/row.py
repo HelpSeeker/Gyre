@@ -115,6 +115,9 @@ class InputRow(Gtk.ListBoxRow):
                 f"({self.item.exist} exist)" if self.item.exist else "",
                 f"({self.item.invalid} errors)" if self.item.invalid else "",
             ]))
+        elif self.item.status.startswith("Waiting"):
+            # Status gets updated to relfect remaining minutes
+            self.progress_bar.set_text(self.item.status)
         else:
             self.progress_bar.set_text(self.item.status)
             self.progress_bar.set_sensitive(False)
