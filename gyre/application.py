@@ -26,8 +26,9 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Handy", "1")
+gi.require_version("Notify", "0.7")
 
-from gi.repository import Gtk, Gio, Handy, GLib, GObject
+from gi.repository import Gtk, Gio, Handy, GLib, GObject, Notify
 
 from gyre import utils
 from gyre.container import cancel_containers, uncancel_containers
@@ -37,6 +38,7 @@ from gyre.interface.add import AddURLWindow, AddWindow
 from gyre.interface.window import GyreWindow
 from gyre.interface.preferences import PreferenceWindow
 from gyre.interface import dialogs
+from gyre.utils import notify_done, notify_error
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables
@@ -108,6 +110,7 @@ class Application(Gtk.Application):
     def do_startup(self):
         Gtk.Application.do_startup(self)
         Handy.init()
+        Notify.init("Gyre")
 
     def do_activate(self):
         if not self.window:
@@ -341,13 +344,14 @@ async def process(model):
             except utils.CancelledError:
                 for item in model:
                     item.status = "Cancelled"
-                break
+                return
             except:
                 for item in model:
                     item.status = "Error: Unknown error"
                 error = traceback.format_exc()
                 utils.write_error_log(error)
-                break
+                GLib.idle_add(notify_error)
+                return
 
         if Settings.get_default().repeat_download:
             for timer in range(Settings.get_default().repeat_interval, 0, -1):
@@ -359,3 +363,5 @@ async def process(model):
                     time.sleep(0.5)
         else:
             break
+
+    GLib.idle_add(notify_done)

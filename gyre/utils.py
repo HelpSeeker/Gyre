@@ -20,7 +20,7 @@ import pathlib
 import threading
 import time
 
-from gi.repository import GLib
+from gi.repository import GLib, Notify
 
 from gyre.settings import Settings
 
@@ -176,3 +176,27 @@ def translate_community_name(community, direction="to_ui"):
         return reverse_map[community]
 
     raise ValueError("Invalid direction")
+
+
+def notify_done():
+    notification = Notify.Notification.new(
+        "Download Finished",
+        None,
+        "io.github.helpseeker.Gyre"
+    )
+    notification.set_timeout(Notify.EXPIRES_DEFAULT)
+    notification.show()
+
+    return False
+
+
+def notify_error():
+    notification = Notify.Notification.new(
+        "Download Failed",
+        "The download was aborted due to an unknown error.",
+        "io.github.helpseeker.Gyre",
+    )
+    notification.set_timeout(Notify.EXPIRES_DEFAULT)
+    notification.show()
+
+    return False
