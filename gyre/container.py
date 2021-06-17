@@ -28,6 +28,7 @@ from urllib.request import urlopen
 from aiohttp import ClientError
 from gi.repository import GObject
 
+from gyre import checker
 from gyre.utils import CancelledError, write_error_log
 from gyre.settings import Settings
 
@@ -121,9 +122,12 @@ class BaseContainer(GObject.GObject):
         ids = []
         for coub in api_json["coubs"]:
             if coub["recoub_to"]:
-                ids.append(coub["recoub_to"]["permalink"])
+                c_id = coub["recoub_to"]["permalink"]
             else:
-                ids.append(coub["permalink"])
+                c_id = coub["permalink"]
+
+            if not (checker.in_archive(c_id) or checker.in_session(c_id)):
+                ids.append(c_id)
 
         self.page_progress += 1
         return ids

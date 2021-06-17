@@ -30,14 +30,15 @@ gi.require_version("Notify", "0.7")
 
 from gi.repository import Gtk, Gio, Handy, GLib, GObject, Notify
 
+from gyre import checker
 from gyre import utils
 from gyre.container import cancel_containers, uncancel_containers
 from gyre.coub import Coub, cancel_coubs, uncancel_coubs
-from gyre.settings import Settings
+from gyre.interface import dialogs
 from gyre.interface.add import AddURLWindow, AddWindow
 from gyre.interface.window import GyreWindow
 from gyre.interface.preferences import PreferenceWindow
-from gyre.interface import dialogs
+from gyre.settings import Settings
 from gyre.utils import notify_done, notify_error
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -284,18 +285,12 @@ class Application(Gtk.Application):
 
 async def process(model):
     while True:
-        ids = set()
+        checker.init()
         coubs = []
 
         quantity = None
         if Settings.get_default().quantity_limit:
             quantity = Settings.get_default().quantity_limit
-
-        archive_content = set()
-        if Settings.get_default().archive:
-            archive = pathlib.Path(Settings.get_default().archive_path)
-            if archive.exists():
-                archive_content = set(archive.read_text().splitlines())
 
         tout = aiohttp.ClientTimeout(total=None)
         conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
@@ -307,20 +302,16 @@ async def process(model):
             try:
                 for item in model:
                     item.status = "Parsing"
-                    temp = await item.get_ids(session, quantity)
-                    # Weed out duplicates and already downloaded IDs
-                    temp = [i for i in temp if not (i in ids or i in archive_content)]
+                    ids = await item.get_ids(session, quantity)
                     # Adjust container count based on filtered ID list
-                    item.count = len(temp)
-                    if temp:
-                        coubs.extend([Coub(i, item, session) for i in temp])
-                        # Ugly, but we want to keep it a set for faster lookup
-                        ids = list(ids)
-                        ids.extend(temp)
-                        ids = set(ids)
+                    item.count = len(ids)
+                    if ids:
+                        coubs.extend([Coub(i, item, session) for i in ids])
                     if quantity is not None:
-                        quantity -= len(temp)
+                        quantity -= len(ids)
                     item.status = "Waiting"
+
+                checker.uninit()
 
                 # Marking containers as finished while parsing is problematic
                 # Users could clean them up (i.e. remove them) and mess up the list order
