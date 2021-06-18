@@ -189,14 +189,6 @@ class Settings(Gio.Settings):
         self.set_int("retry-attempts", value)
 
     @property
-    def quantity_limit(self):
-        return self.get_int("quantity-limit")
-
-    @quantity_limit.setter
-    def quantity_limit(self, value):
-        self.set_int("quantity-limit", value)
-
-    @property
     def download_recoubs(self):
         return self.get_enum("download-recoubs")
 

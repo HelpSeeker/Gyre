@@ -69,7 +69,6 @@ class PreferenceWindow(Handy.PreferencesWindow):
     retries_spin_button = Gtk.Template.Child("retries_spin_button")
 
     # Limits and Filters
-    quantity_spin_button = Gtk.Template.Child("quantity_spin_button")
     recoubs_row = Gtk.Template.Child("recoubs_row")
 
     # Automatization
@@ -220,18 +219,6 @@ class PreferenceWindow(Handy.PreferencesWindow):
             )
         )
         self.retries_spin_button.connect("notify::value", self._on_retries_changed)
-
-        # Quantity
-        self.quantity_spin_button.set_adjustment(
-            Gtk.Adjustment(
-                value=self.settings.quantity_limit,
-                lower=0,
-                upper=99999,
-                step_increment=1,
-                page_increment=10,
-            )
-        )
-        self.quantity_spin_button.connect("notify::value", self._on_quantity_changed)
 
         # Recoubs
         liststore = Gio.ListStore.new(Handy.ValueObject)
@@ -403,9 +390,6 @@ class PreferenceWindow(Handy.PreferencesWindow):
 
     def _on_retries_changed(self, spin_button, prop_name):
         self.settings.retry_attempts = spin_button.get_value_as_int()
-
-    def _on_quantity_changed(self, spin_button, prop_name):
-        self.settings.quantity_limit = spin_button.get_value_as_int()
 
     def _on_recoubs_download_changed(self, combo_row, prop_name):
         self.settings.download_recoubs = combo_row.get_selected_index()

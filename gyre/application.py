@@ -288,10 +288,6 @@ async def process(model):
         checker.init()
         coubs = []
 
-        quantity = None
-        if Settings.get_default().quantity_limit:
-            quantity = Settings.get_default().quantity_limit
-
         tout = aiohttp.ClientTimeout(total=None)
         conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
         async with aiohttp.ClientSession(timeout=tout, connector=conn) as session:
@@ -302,13 +298,11 @@ async def process(model):
             try:
                 for item in model:
                     item.status = "Parsing"
-                    ids = await item.get_ids(session, quantity)
+                    ids = await item.get_ids(session)
                     # Adjust container count based on filtered ID list
                     item.count = len(ids)
                     if ids:
                         coubs.extend([Coub(i, item, session) for i in ids])
-                    if quantity is not None:
-                        quantity -= len(ids)
                     item.status = "Waiting"
 
                 checker.uninit()

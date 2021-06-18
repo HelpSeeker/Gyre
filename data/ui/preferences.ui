@@ -242,22 +242,6 @@
           <object class="HdyPreferencesGroup">
             <property name="title" translatable="yes">Limits and Filters</property>
             <child>
-              <object class="HdyActionRow">
-                <property name="title" translatable="yes">Quantity</property>
-                <property name="activatable-widget">quantity_spin_button</property>
-                <property name="subtitle" translatable="yes">Limit number of downloaded coubs (0 for no limit)</property>
-                <child>
-                  <object class="GtkSpinButton" id="quantity_spin_button">
-                    <property name="valign">center</property>
-                    <property name="max-width-chars">5</property>
-                    <property name="input-purpose">number</property>
-                    <property name="snap-to-ticks">True</property>
-                    <property name="numeric">True</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
               <object class="HdyComboRow" id="recoubs_row">
                 <property name="title" translatable="yes">Recoubs</property>
                 <property name="subtitle" translatable="yes">Change how recoubs are treated during channel downloads</property>

@@ -54,7 +54,7 @@ class BaseContainer(GObject.GObject):
     type = ""
     id = ""
     sort = ""
-    quantity = 0
+    quantity = None
     template = ""
 
     # Attempts are done on a per-page level, but the attempt limit is for all pages
@@ -132,19 +132,14 @@ class BaseContainer(GObject.GObject):
         self.page_progress += 1
         return ids
 
-    async def get_ids(self, session, quantity):
+    async def get_ids(self, session):
         self._assemble_template()
 
         try:
             self._fetch_page_count()
 
-            if quantity is None and self.quantity:
-                quantity = self.quantity
-            elif quantity is not None and self.quantity:
-                quantity = self.quantity if self.quantity < quantity else quantity
-
-            if quantity is not None:
-                max_pages = math.ceil(quantity/self.PER_PAGE)
+            if self.quantity:
+                max_pages = math.ceil(self.quantity/self.PER_PAGE)
                 if self.pages > max_pages:
                     self.pages = max_pages
 
@@ -162,8 +157,8 @@ class BaseContainer(GObject.GObject):
             write_error_log("No retry attempts left for {self.type} {self.id}!")
             ids = []
 
-        if quantity is not None:
-            return ids[:quantity]
+        if self.quantity:
+            return ids[:self.quantity]
         return ids
 
     def reset(self):
@@ -182,14 +177,11 @@ class SingleCoub(BaseContainer):
         super().__init__(id, sort, quantity)
 
     # async is unnecessary here, but avoids the need for special treatment
-    async def get_ids(self, session, quantity):
+    async def get_ids(self, session):
         # To trigger status change
         self.pages = 1
         self.page_progress = 1
 
-        # Single coubs don't support per-container quantities
-        if quantity is not None:
-            return [self.id][:quantity]
         return [self.id]
 
 
@@ -214,7 +206,7 @@ class LinkList(BaseContainer):
 
         return True
 
-    async def get_ids(self, session, quantity):
+    async def get_ids(self, session):
         # To trigger status change
         self.pages = 1
         self.page_progress = 1
@@ -222,18 +214,13 @@ class LinkList(BaseContainer):
         if not self._valid_list_file():
             return []
 
-        if quantity is None and self.quantity:
-            quantity = self.quantity
-        elif quantity is not None and self.quantity:
-            quantity = self.quantity if self.quantity < quantity else quantity
-
         ids = self.list.read_text().strip()
         ids = re.split(r"\s+", ids)
         ids = [i for i in ids if i.startswith("https://coub.com/view/")]
         ids = [i.replace("https://coub.com/view/", "") for i in ids]
 
-        if quantity is not None:
-            return ids[:quantity]
+        if self.quantity:
+            return ids[:self.quantity]
         return ids
 
 

@@ -110,7 +110,6 @@ def export_profile(path, liststore):
         "download_share_version",
         "connections",
         "retry_attempts",
-        "quantity_limit",
         "download_recoubs",
         "repeat_download",
         "repeat_interval",
