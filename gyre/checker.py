@@ -34,6 +34,7 @@ def init():
     global session, archive
 
     session = set()
+    archive = set()
     if Settings.get_default().archive:
         archive_file = pathlib.Path(Settings.get_default().archive_path)
         if archive_file.exists():
