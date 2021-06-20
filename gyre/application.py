@@ -271,6 +271,7 @@ class Application(Gtk.Application):
 
     def _on_idle_changed(self, *args):
         self.window.add_button.set_sensitive(self.idle)
+        self.window.clean_button.set_sensitive(not Settings.get_default().repeat_download or self.idle)
         for row in self.window.listbox:
             row.set_editable(self.idle)
 
