@@ -89,25 +89,15 @@ class InputRow(Gtk.ListBoxRow):
     def _on_item_status_changed(self, *args):
         self.progress_bar.set_sensitive(True)
         self.progress_bar.set_visible(self.item.status)
-        if self.item.status == "Started":
-            self.progress_bar.set_fraction(0)
-            self.progress_bar.set_text("Waiting to start...")
-        elif self.item.status == "Parsing":
+        if self.item.status == "Parsing":
             self.progress_bar.set_fraction(0)
             self.progress_bar.set_text("Fetching links...")
-        elif self.item.status == "Waiting":
-            if Settings.get_default().output_list:
-                self.progress_bar.set_fraction(1)
-                self.progress_bar.set_text("Done parsing!")
-            else:
-                self.progress_bar.set_fraction(0)
-                self.progress_bar.set_text("Waiting to download...")
         elif self.item.status == "Downloading":
             self.progress_bar.set_fraction(0)
             self.progress_bar.set_text("Downloading coubs...")
         elif self.item.status == "No new coubs":
             self.progress_bar.set_fraction(1)
-            self.progress_bar.set_text("Finished! (no new coubs or limit exceeded)")
+            self.progress_bar.set_text("Finished! (no new coubs)")
         elif self.item.status == "Finished":
             self.progress_bar.set_fraction(1)
             self.progress_bar.set_text(" ".join([

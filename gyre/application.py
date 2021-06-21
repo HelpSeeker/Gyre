@@ -33,7 +33,7 @@ from gi.repository import Gtk, Gio, Handy, GLib, GObject, Notify
 from gyre import checker
 from gyre import utils
 from gyre.container import cancel_containers, uncancel_containers
-from gyre.coub import Coub, cancel_coubs, uncancel_coubs
+from gyre.coub import cancel_coubs, uncancel_coubs
 from gyre.interface import dialogs
 from gyre.interface.add import AddURLWindow, AddWindow
 from gyre.interface.window import GyreWindow
@@ -44,10 +44,6 @@ from gyre.utils import notify_done, notify_error
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# A hard limit on how many Coubs to process at once
-# Prevents excessive RAM usage for very large downloads
-COUB_LIMIT = 1000
 
 # To signal cancellation to the work thread
 CANCELLED = False
@@ -287,57 +283,28 @@ class Application(Gtk.Application):
 async def process(model):
     while True:
         checker.init()
-        coubs = []
 
         tout = aiohttp.ClientTimeout(total=None)
         conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
         async with aiohttp.ClientSession(timeout=tout, connector=conn) as session:
-            for item in model:
-                item.status = "Started"
-                item.reset()
-
             try:
-                for item in model:
-                    item.status = "Parsing"
-                    ids = await item.get_ids(session)
-                    # Adjust container count based on filtered ID list
-                    item.count = len(ids)
-                    if ids:
-                        coubs.extend([Coub(i, item, session) for i in ids])
-                    item.status = "Waiting"
-
-                checker.uninit()
-
-                # Marking containers as finished while parsing is problematic
-                # Users could clean them up (i.e. remove them) and mess up the list order
-                for item in model:
-                    if Settings.get_default().output_list:
-                        item.status = "Finished"
-                    elif not item.count:
-                        item.status = "No new coubs"
-                    else:
-                        item.status = "Downloading"
-
-                if Settings.get_default().output_list:
-                    links = [f"https://coub.com/view/{coub.id}" for coub in coubs]
-                    pathlib.Path(Settings.get_default().output_list_path).write_text("\n".join(links))
-                    return
-
-                while coubs:
-                    tasks = [c.process() for c in coubs[:COUB_LIMIT]]
-                    await asyncio.gather(*tasks)
-                    coubs = coubs[COUB_LIMIT:]
+                tasks = [item.process(session) for item in model]
+                await asyncio.gather(*tasks)
             except utils.CancelledError:
+                checker.uninit()
                 for item in model:
                     item.status = "Cancelled"
                 return
             except:
+                checker.uninit()
                 for item in model:
                     item.status = "Error: Unknown error"
                 error = traceback.format_exc()
                 utils.write_error_log(error)
                 GLib.idle_add(notify_error)
                 return
+
+        checker.uninit()
 
         if Settings.get_default().repeat_download:
             for timer in range(Settings.get_default().repeat_interval, 0, -1):

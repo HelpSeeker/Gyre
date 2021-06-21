@@ -20,15 +20,14 @@ import json
 import math
 import pathlib
 import re
-from urllib.error import HTTPError
 from urllib.parse import quote as urlquote
 from urllib.parse import unquote as urlunquote
-from urllib.request import urlopen
 
 from aiohttp import ClientError
 from gi.repository import GObject
 
 from gyre import checker
+from gyre.coub import Coub
 from gyre.utils import CancelledError, write_error_log
 from gyre.settings import Settings
 
@@ -37,6 +36,10 @@ from gyre.settings import Settings
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CANCELLED = False
+
+# A hard limit on how many Coubs to process at once
+# Prevents excessive RAM usage for very large downloads
+COUB_LIMIT = 1000
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -85,20 +88,21 @@ class BaseContainer(GObject.GObject):
 
     @status.setter
     def status(self, value):
-        if not self.status.startswith("Error") or value == "Started":
+        if not self.status.startswith("Error"):
             self.status_value = value
 
     def _assemble_template(self):
         pass
 
-    def _fetch_page_count(self):
+    async def _fetch_page_count(self, session):
         if CANCELLED:
             raise CancelledError
 
         try:
-            with urlopen(self.template) as resp:
-                self.pages = json.loads(resp.read())["total_pages"]
-        except HTTPError:
+            async with session.get(self.template) as response:
+                api_json = await response.read()
+                self.pages = json.loads(api_json)["total_pages"]
+        except ClientResponseError:
             raise ContainerUnavailableError
 
     async def _fetch_page_ids(self, request, session):
@@ -132,11 +136,11 @@ class BaseContainer(GObject.GObject):
         self.page_progress += 1
         return ids
 
-    async def get_ids(self, session):
+    async def _get_ids(self, session):
         self._assemble_template()
 
         try:
-            self._fetch_page_count()
+            await self._fetch_page_count(session)
 
             if self.quantity:
                 max_pages = math.ceil(self.quantity/self.PER_PAGE)
@@ -161,13 +165,37 @@ class BaseContainer(GObject.GObject):
             return ids[:self.quantity]
         return ids
 
-    def reset(self):
+    def _reset(self):
         self.page_progress = 0
         self.pages = 0
         self.count = 0
         self.done = 0
         self.invalid = 0
         self.exist = 0
+
+    async def process(self, session):
+        self._reset()
+        self.status = "Parsing"
+        ids = await self._get_ids(session)
+        self.count = len(ids)
+
+        if Settings.get_default().output_list:
+            links = [f"https://coub.com/view/{i}" for i in ids]
+            with pathlib.Path(Settings.get_default().output_list_path).open("a") as f:
+                print(*links, sep="\n", file=f)
+            self.status = "Finished"
+            return
+        elif not self.count:
+            self.status = "No new coubs"
+        else:
+            self.status = "Downloading"
+
+        coubs = [Coub(i, self, session) for i in ids]
+
+        while coubs:
+            tasks = [c.process() for c in coubs[:COUB_LIMIT]]
+            await asyncio.gather(*tasks)
+            coubs = coubs[COUB_LIMIT:]
 
 
 class SingleCoub(BaseContainer):
@@ -177,7 +205,7 @@ class SingleCoub(BaseContainer):
         super().__init__(id, sort, quantity)
 
     # async is unnecessary here, but avoids the need for special treatment
-    async def get_ids(self, session):
+    async def _get_ids(self, session):
         # To trigger status change
         self.pages = 1
         self.page_progress = 1
@@ -206,7 +234,7 @@ class LinkList(BaseContainer):
 
         return True
 
-    async def get_ids(self, session):
+    async def _get_ids(self, session):
         # To trigger status change
         self.pages = 1
         self.page_progress = 1
@@ -272,8 +300,8 @@ class Tag(BaseContainer):
 
         self.template = template
 
-    def _fetch_page_count(self):
-        super()._fetch_page_count()
+    async def _fetch_page_count(self, session):
+        await super()._fetch_page_count(session)
         # API limits tags to 99 pages
         if self.pages > 99:
             self.pages = 99
@@ -335,8 +363,8 @@ class Community(BaseContainer):
 
         self.template = template
 
-    def _fetch_page_count(self):
-        super()._fetch_page_count()
+    async def _fetch_page_count(self, session):
+        await super()._fetch_page_count(session)
         # API limits communities to 99 pages
         if self.pages > 99:
             self.pages = 99
@@ -424,8 +452,8 @@ class HotSection(BaseContainer):
 
         self.template = template
 
-    def _fetch_page_count(self):
-        super()._fetch_page_count()
+    async def _fetch_page_count(self, session):
+        await super()._fetch_page_count(session)
         # API limits hot section to 99 pages
         if self.pages > 99:
             self.pages = 99
