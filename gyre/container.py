@@ -23,7 +23,7 @@ import re
 from urllib.parse import quote as urlquote
 from urllib.parse import unquote as urlunquote
 
-from aiohttp import ClientError
+from aiohttp import ClientError, ClientResponseError
 from gi.repository import GObject
 
 from gyre import checker
