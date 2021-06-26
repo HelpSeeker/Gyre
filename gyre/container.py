@@ -16,6 +16,7 @@
 # along with Gyre.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+from functools import wraps
 import json
 import math
 import pathlib
@@ -40,6 +41,19 @@ CANCELLED = False
 # A hard limit on how many Coubs to process at once
 # Prevents excessive RAM usage for very large downloads
 COUB_LIMIT = 1000
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Decorator
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def cancellable(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        if CANCELLED:
+            raise CancelledError
+        return await func(*args, **kwargs)
+
+    return wrapper
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -88,10 +102,8 @@ class BaseContainer(GObject.GObject):
     def _assemble_template(self):
         pass
 
+    @cancellable
     async def _fetch_page_count(self, session):
-        if CANCELLED:
-            raise CancelledError
-
         try:
             async with session.get(self.template) as response:
                 api_json = await response.read()
@@ -99,17 +111,21 @@ class BaseContainer(GObject.GObject):
         except (ClientResponseError, KeyError):
             raise ContainerUnavailableError
 
+    @cancellable
+    async def _fetch_api_json(self, request, session):
+        async with session.get(request) as response:
+            api_json = await response.read()
+            api_json = json.loads(api_json)
+
+        return api_json
+
+    @cancellable
     async def _fetch_page_ids(self, request, session):
         api_json = None
         retries = Settings.get_default().retry_attempts
         while retries < 0 or self.attempt <= retries:
-            if CANCELLED:
-                raise CancelledError
-
             try:
-                async with session.get(request) as response:
-                    api_json = await response.read()
-                    api_json = json.loads(api_json)
+                api_json = await self._fetch_api_json(request, session)
                 break
             except (ClientError, json.decoder.JSONDecodeError):
                 self.attempt += 1
@@ -130,6 +146,7 @@ class BaseContainer(GObject.GObject):
         self.page_progress += 1
         return ids
 
+    @cancellable
     async def _get_ids(self, session):
         self._assemble_template()
 
@@ -160,6 +177,7 @@ class BaseContainer(GObject.GObject):
         self.invalid = 0
         self.exist = 0
 
+    @cancellable
     async def process(self, session):
         self._reset()
 
@@ -207,6 +225,7 @@ class SingleCoub(BaseContainer):
         super().__init__(id, sort, quantity)
 
     # async is unnecessary here, but avoids the need for special treatment
+    @cancellable
     async def _get_ids(self, session):
         return [self.id]
 
@@ -223,6 +242,7 @@ class LinkList(BaseContainer):
         with self.list.open("r") as f:
             _ = f.read(1)
 
+    @cancellable
     async def _get_ids(self, session):
         self._valid_list_file()
 
@@ -284,6 +304,7 @@ class Tag(BaseContainer):
 
         self.template = template
 
+    @cancellable
     async def _fetch_page_count(self, session):
         await super()._fetch_page_count(session)
         # API limits tags to 99 pages
@@ -347,6 +368,7 @@ class Community(BaseContainer):
 
         self.template = template
 
+    @cancellable
     async def _fetch_page_count(self, session):
         await super()._fetch_page_count(session)
         # API limits communities to 99 pages
@@ -436,6 +458,7 @@ class HotSection(BaseContainer):
 
         self.template = template
 
+    @cancellable
     async def _fetch_page_count(self, session):
         await super()._fetch_page_count(session)
         # API limits hot section to 99 pages
