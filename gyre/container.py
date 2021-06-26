@@ -102,7 +102,7 @@ class BaseContainer(GObject.GObject):
             async with session.get(self.template) as response:
                 api_json = await response.read()
                 self.pages = json.loads(api_json)["total_pages"]
-        except ClientResponseError:
+        except (ClientResponseError, KeyError):
             raise ContainerUnavailableError
 
     async def _fetch_page_ids(self, request, session):
@@ -117,7 +117,7 @@ class BaseContainer(GObject.GObject):
                     api_json = await response.read()
                     api_json = json.loads(api_json)
                 break
-            except ClientError:
+            except (ClientError, json.decoder.JSONDecodeError):
                 self.attempt += 1
 
         if api_json is None:
