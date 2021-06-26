@@ -292,6 +292,8 @@ async def process(model):
                         item.complete = False
                 return
             except:
+                cancel_containers()
+                cancel_coubs()
                 for item in model:
                     item.error = True
                     item.error_msg = "Error: Unknown error!"
