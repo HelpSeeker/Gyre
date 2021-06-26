@@ -24,7 +24,6 @@ import re
 from urllib.parse import quote as urlquote
 from urllib.parse import unquote as urlunquote
 
-from aiohttp import ClientError, ClientResponseError
 from gi.repository import GObject
 
 from gyre import checker
@@ -60,10 +59,6 @@ def cancellable(func):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ContainerUnavailableError(Exception):
-    pass
-
-
-class InsufficientRetriesError(Exception):
     pass
 
 
@@ -108,30 +103,31 @@ class BaseContainer(GObject.GObject):
             async with session.get(self.template) as response:
                 api_json = await response.read()
                 self.pages = json.loads(api_json)["total_pages"]
-        except (ClientResponseError, KeyError):
+        except:
             raise ContainerUnavailableError
 
     @cancellable
     async def _fetch_api_json(self, request, session):
-        async with session.get(request) as response:
-            api_json = await response.read()
-            api_json = json.loads(api_json)
+        try:
+            async with session.get(request) as response:
+                api_json = await response.read()
+                api_json = json.loads(api_json)
+        except:
+            api_json = None
 
         return api_json
 
     @cancellable
     async def _fetch_page_ids(self, request, session):
-        api_json = None
         retries = Settings.get_default().retry_attempts
         while retries < 0 or self.attempt <= retries:
-            try:
-                api_json = await self._fetch_api_json(request, session)
+            api_json = await self._fetch_api_json(request, session)
+            if api_json:
                 break
-            except (ClientError, json.decoder.JSONDecodeError):
-                self.attempt += 1
+            self.attempt += 1
 
-        if api_json is None:
-            raise InsufficientRetriesError
+        if not api_json:
+            raise ContainerUnavailableError
 
         ids = []
         for coub in api_json["coubs"]:
@@ -202,12 +198,8 @@ class BaseContainer(GObject.GObject):
             self.complete = True
         except ContainerUnavailableError:
             self.error = True
-            self.error_msg = f"Error: {self.type} doesn't exist!"
-            write_error_log(f"{self.type}: {self.id} doesn't exist")
-        except InsufficientRetriesError:
-            self.error = True
-            self.error_msg = "Error: No retry attempts left!"
-            write_error_log("{self.type} {self.id} took too many attempts")
+            self.error_msg = f"Error: Couldn't fetch API response!"
+            write_error_log(f"{self.type}: {self.id} invalid or missing API response")
         except FileNotFoundError:
             self.error = True
             self.error_msg = "Error: List doesn't exist!"
