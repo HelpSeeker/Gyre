@@ -56,9 +56,11 @@ class InputRow(Gtk.ListBoxRow):
 
         self.edit_button.connect("clicked", self._on_edit)
         self.delete_button.connect("clicked", self._on_delete)
-        self.item.connect("notify::status", lambda *args: GLib.idle_add(self._on_item_status_changed))
         self.item.connect("notify::page-progress", lambda *args: GLib.idle_add(self._on_progress_update))
         self.item.connect("notify::done", lambda *args: GLib.idle_add(self._on_progress_update))
+        self.item.connect("notify::count", lambda *args: GLib.idle_add(self._on_progress_update))
+        self.item.connect("notify::complete", lambda *args: GLib.idle_add(self._on_progress_update))
+        self.item.connect("notify::error", lambda *args: GLib.idle_add(self._on_progress_update))
 
     def set_editable(self, boolean):
         self.edit_button.set_sensitive(boolean)
@@ -73,9 +75,25 @@ class InputRow(Gtk.ListBoxRow):
         self.model.remove(self.model.find(self.item)[1])
 
     def _on_progress_update(self, *args):
-        if self.item.status == "Parsing" and self.item.pages:
-            self.progress_bar.set_fraction(self.item.page_progress/self.item.pages)
-        elif self.item.status == "Downloading" and self.item.count:
+        if self.item.complete:
+            self.progress_bar.set_fraction(1)
+            if Settings.get_default().repeat_download:
+                self.progress_bar.set_text("Finished! Waiting for next download to start...")
+            elif not self.item.count:
+                self.progress_bar.set_text("Finished! (no new coubs)")
+            elif Settings.get_default().output_list:
+                self.progress_bar.set_text("Finished! IDs written to file.")
+            else:
+                self.progress_bar.set_text(" ".join([
+                    "Finished!",
+                    f"({self.item.exist} exist)" if self.item.exist else "",
+                    f"({self.item.invalid} errors)" if self.item.invalid else "",
+                ]))
+        elif self.item.error:
+            self.progress_bar.set_sensitive(False)
+            self.progress_bar.set_text(self.item.error_msg)
+        # Download progress
+        elif self.item.count:
             self.progress_bar.set_fraction(self.item.done/self.item.count)
             self.progress_bar.set_text(" ".join([
                 "Downloading coubs...",
@@ -83,31 +101,12 @@ class InputRow(Gtk.ListBoxRow):
                 f"({self.item.exist} exist)" if self.item.exist else "",
                 f"({self.item.invalid} errors)" if self.item.invalid else "",
             ]))
-            if self.item.done == self.item.count:
-                self.item.status = "Finished"
-
-    def _on_item_status_changed(self, *args):
-        self.progress_bar.set_sensitive(True)
-        self.progress_bar.set_visible(self.item.status)
-        if self.item.status == "Parsing":
+        # Parsing progress
+        elif self.item.page_progress:
+            self.progress_bar.set_fraction(self.item.page_progress/self.item.pages)
+        # Initial state
+        else:
+            self.progress_bar.set_sensitive(True)
+            self.progress_bar.set_visible(True)
             self.progress_bar.set_fraction(0)
             self.progress_bar.set_text("Fetching links...")
-        elif self.item.status == "Downloading":
-            self.progress_bar.set_fraction(0)
-            self.progress_bar.set_text("Downloading coubs...")
-        elif self.item.status == "No new coubs":
-            self.progress_bar.set_fraction(1)
-            self.progress_bar.set_text("Finished! (no new coubs)")
-        elif self.item.status == "Finished":
-            self.progress_bar.set_fraction(1)
-            self.progress_bar.set_text(" ".join([
-                "Finished!",
-                f"({self.item.exist} exist)" if self.item.exist else "",
-                f"({self.item.invalid} errors)" if self.item.invalid else "",
-            ]))
-        elif self.item.status.startswith("Waiting"):
-            # Status gets updated to relfect remaining minutes
-            self.progress_bar.set_text(self.item.status)
-        else:
-            self.progress_bar.set_text(self.item.status)
-            self.progress_bar.set_sensitive(False)

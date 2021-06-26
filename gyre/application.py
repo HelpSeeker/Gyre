@@ -161,11 +161,7 @@ class Application(Gtk.Application):
         add_window.show_all()
 
     def do_clean_list(self, *args):
-        # Temp list necessary as removing directly would mess up the order
-        to_remove = []
-        for item in self.window.list:
-            if item.status in ["Finished", "No new coubs"]:
-                to_remove.append(item)
+        to_remove = [item for item in self.window.list if item.complete]
         for item in to_remove:
             self.window.list.remove(self.window.list.find(item)[1])
 
@@ -290,12 +286,17 @@ async def process(model):
             except utils.CancelledError:
                 checker.uninit()
                 for item in model:
-                    item.status = "Cancelled"
+                    item.error = True
+                    item.error_msg = "Cancelled"
+                    # "Cancelled" should take precedence over "Finished! Waiting for next download..."
+                    if Settings.get_default().repeat_download:
+                        item.complete = False
                 return
             except:
                 checker.uninit()
                 for item in model:
-                    item.status = "Error: Unknown error"
+                    item.error = True
+                    item.error_msg = "Error: Unknown error!"
                 error = traceback.format_exc()
                 utils.write_error_log(error)
                 GLib.idle_add(notify_error)
@@ -305,8 +306,6 @@ async def process(model):
 
         if Settings.get_default().repeat_download:
             for timer in range(Settings.get_default().repeat_interval, 0, -1):
-                for item in model:
-                    item.status = f"Waiting to start next download ({timer} min. remaining)"
                 for _ in range(120):
                     if CANCELLED:
                         break

@@ -63,12 +63,15 @@ class BaseContainer(GObject.GObject):
     # Attempts are done on a per-page level, but the attempt limit is for all pages
     attempt = 0
 
-    status_value = ""
     page_progress = GObject.Property(type=int, default=0)
     done = GObject.Property(type=int, default=0)
+    count = GObject.Property(type=int, default=0)
+
+    complete = GObject.Property(type=bool, default=False)
+    error = GObject.Property(type=bool, default=False)
+    error_msg = None
 
     pages = 0
-    count = 0
     invalid = 0
     exist = 0
 
@@ -81,15 +84,6 @@ class BaseContainer(GObject.GObject):
         self.id = urlunquote(id)
         self.sort = sort
         self.quantity = quantity
-
-    @GObject.Property(type=str)
-    def status(self):
-        return self.status_value
-
-    @status.setter
-    def status(self, value):
-        if not self.status.startswith("Error"):
-            self.status_value = value
 
     def _assemble_template(self):
         pass
@@ -139,33 +133,26 @@ class BaseContainer(GObject.GObject):
     async def _get_ids(self, session):
         self._assemble_template()
 
-        try:
-            await self._fetch_page_count(session)
+        await self._fetch_page_count(session)
 
-            if self.quantity:
-                max_pages = math.ceil(self.quantity/self.PER_PAGE)
-                if self.pages > max_pages:
-                    self.pages = max_pages
+        if self.quantity:
+            max_pages = math.ceil(self.quantity/self.PER_PAGE)
+            if self.pages > max_pages:
+                self.pages = max_pages
 
-            requests = [f"{self.template}&page={p}" for p in range(1, self.pages+1)]
-            tasks = [self._fetch_page_ids(r, session) for r in requests]
-            ids = await asyncio.gather(*tasks)
-            ids = [i for page in ids for i in page]
-        except ContainerUnavailableError:
-            self.status = f"Error: Invalid {self.type}"
-            write_error_log(f"Invalid {self.type}: {self.id}")
-            ids = []
-        except InsufficientRetriesError:
-            # Be strict about not handling only partially parsed containers
-            self.status = "Error: No retry attempts left!"
-            write_error_log("No retry attempts left for {self.type} {self.id}!")
-            ids = []
+        requests = [f"{self.template}&page={p}" for p in range(1, self.pages+1)]
+        tasks = [self._fetch_page_ids(r, session) for r in requests]
+        ids = await asyncio.gather(*tasks)
+        ids = [i for page in ids for i in page]
 
         if self.quantity:
             return ids[:self.quantity]
         return ids
 
     def _reset(self):
+        self.complete = False
+        self.cancelled = False
+        self.error = False
         self.page_progress = 0
         self.pages = 0
         self.count = 0
@@ -175,27 +162,42 @@ class BaseContainer(GObject.GObject):
 
     async def process(self, session):
         self._reset()
-        self.status = "Parsing"
-        ids = await self._get_ids(session)
-        self.count = len(ids)
 
-        if Settings.get_default().output_list:
-            links = [f"https://coub.com/view/{i}" for i in ids]
-            with pathlib.Path(Settings.get_default().output_list_path).open("a") as f:
-                print(*links, sep="\n", file=f)
-            self.status = "Finished"
-            return
-        elif not self.count:
-            self.status = "No new coubs"
-        else:
-            self.status = "Downloading"
+        try:
+            ids = await self._get_ids(session)
+            self.count = len(ids)
 
-        coubs = [Coub(i, self, session) for i in ids]
+            if Settings.get_default().output_list:
+                links = [f"https://coub.com/view/{i}" for i in ids]
+                with pathlib.Path(Settings.get_default().output_list_path).open("a") as f:
+                    print(*links, sep="\n", file=f)#
+                self.complete = True
+                return
 
-        while coubs:
-            tasks = [c.process() for c in coubs[:COUB_LIMIT]]
-            await asyncio.gather(*tasks)
-            coubs = coubs[COUB_LIMIT:]
+            coubs = [Coub(i, self, session) for i in ids]
+
+            while coubs:
+                tasks = [c.process() for c in coubs[:COUB_LIMIT]]
+                await asyncio.gather(*tasks)
+                coubs = coubs[COUB_LIMIT:]
+
+            self.complete = True
+        except ContainerUnavailableError:
+            self.error = True
+            self.error_msg = f"Error: {self.type} doesn't exist!"
+            write_error_log(f"{self.type}: {self.id} doesn't exist")
+        except InsufficientRetriesError:
+            self.error = True
+            self.error_msg = "Error: No retry attempts left!"
+            write_error_log("{self.type} {self.id} took too many attempts")
+        except FileNotFoundError:
+            self.error = True
+            self.error_msg = "Error: List doesn't exist!"
+            write_error_log("{self.list.resolve()} doesn't exits")
+        except (OSError, UnicodeError):
+            self.error = True
+            self.error_msg = "Error: Invalid list file!"
+            write_error_log("{self.list.resolve()} can't be read")
 
 
 class SingleCoub(BaseContainer):
@@ -206,10 +208,6 @@ class SingleCoub(BaseContainer):
 
     # async is unnecessary here, but avoids the need for special treatment
     async def _get_ids(self, session):
-        # To trigger status change
-        self.pages = 1
-        self.page_progress = 1
-
         return [self.id]
 
 
@@ -221,26 +219,12 @@ class LinkList(BaseContainer):
         self.list = pathlib.Path(id)
 
     def _valid_list_file(self):
-        try:
-            # Avoid using path object methods as they always read the whole file
-            with self.list.open("r") as f:
-                _ = f.read(1)
-        except FileNotFoundError:
-            self.status = "Error: List doesn't exist!"
-            return False
-        except (OSError, UnicodeError):
-            self.status = "Error: Invalid list file!"
-            return False
-
-        return True
+        # Avoid using path object methods as they always read the whole file
+        with self.list.open("r") as f:
+            _ = f.read(1)
 
     async def _get_ids(self, session):
-        # To trigger status change
-        self.pages = 1
-        self.page_progress = 1
-
-        if not self._valid_list_file():
-            return []
+        self._valid_list_file()
 
         ids = self.list.read_text().strip()
         ids = re.split(r"\s+", ids)
