@@ -222,6 +222,7 @@ class Application(Gtk.Application):
 
         uncancel_containers()
         uncancel_coubs()
+        CANCELLED = False
 
         # Prompt user, if no existing output folder is selected
         # This can happen if no folder was chosen yet or if the chosen one was deleted
@@ -259,11 +260,7 @@ class Application(Gtk.Application):
         cancel_containers()
         cancel_coubs()
         CANCELLED = True
-        # Stall until the work thread finished
-        while not self.idle:
-            time.sleep(0.1)
         self._clean_up()
-        CANCELLED = False
 
     def _on_idle_changed(self, *args):
         self.window.add_button.set_sensitive(self.idle)
