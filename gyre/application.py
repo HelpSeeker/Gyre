@@ -284,7 +284,6 @@ async def process(model):
                 tasks = [item.process(session) for item in model]
                 await asyncio.gather(*tasks)
             except utils.CancelledError:
-                checker.uninit()
                 for item in model:
                     item.error = True
                     item.error_msg = "Cancelled"
@@ -293,7 +292,6 @@ async def process(model):
                         item.complete = False
                 return
             except:
-                checker.uninit()
                 for item in model:
                     item.error = True
                     item.error_msg = "Error: Unknown error!"
@@ -301,8 +299,8 @@ async def process(model):
                 utils.write_error_log(error)
                 GLib.idle_add(notify_error)
                 return
-
-        checker.uninit()
+            finally:
+                checker.uninit()
 
         if Settings.get_default().repeat_download:
             for timer in range(Settings.get_default().repeat_interval, 0, -1):
