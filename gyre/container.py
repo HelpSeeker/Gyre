@@ -58,7 +58,7 @@ def cancellable(func):
 # Classes
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ContainerUnavailableError(Exception):
+class APIResponseError(Exception):
     pass
 
 
@@ -103,7 +103,7 @@ class BaseContainer(GObject.GObject):
                 api_json = await response.read()
                 self.pages = json.loads(api_json)["total_pages"]
         except:
-            raise ContainerUnavailableError
+            raise APIResponseError
 
     @cancellable
     async def _fetch_api_json(self, request, session):
@@ -126,7 +126,7 @@ class BaseContainer(GObject.GObject):
             self.attempt += 1
 
         if not api_json:
-            raise ContainerUnavailableError
+            raise APIResponseError
 
         ids = []
         for coub in api_json["coubs"]:
@@ -162,7 +162,6 @@ class BaseContainer(GObject.GObject):
 
     def _reset(self):
         self.complete = False
-        self.cancelled = False
         self.error = False
         self.page_progress = 0
         self.pages = 0
@@ -194,18 +193,18 @@ class BaseContainer(GObject.GObject):
                 coubs = coubs[COUB_LIMIT:]
 
             self.complete = True
-        except ContainerUnavailableError:
+        except APIResponseError:
             self.error = True
-            self.error_msg = f"Error: Couldn't fetch API response!"
+            self.error_msg = "Error: Couldn't fetch API response!"
             write_error_log(f"{self.type}: {self.id} invalid or missing API response")
         except FileNotFoundError:
             self.error = True
             self.error_msg = "Error: List doesn't exist!"
-            write_error_log("{self.list.resolve()} doesn't exits")
+            write_error_log(f"{self.id} doesn't exits")
         except (OSError, UnicodeError):
             self.error = True
             self.error_msg = "Error: Invalid list file!"
-            write_error_log("{self.list.resolve()} can't be read")
+            write_error_log(f"{self.id} can't be read")
 
 
 class SingleCoub(BaseContainer):
@@ -226,6 +225,7 @@ class LinkList(BaseContainer):
     def __init__(self, id, sort="", quantity=0):
         super().__init__(id, sort, quantity)
         self.list = pathlib.Path(id)
+        self.id = self.list.resolve()
 
     def _valid_list_file(self):
         # Avoid using path object methods as they always read the whole file
