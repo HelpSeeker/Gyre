@@ -67,7 +67,6 @@ class BaseContainer(GObject.GObject):
     id = ""
     sort = ""
     quantity = None
-    template = ""
 
     # Attempts are done on a per-page level, but the attempt limit is for all pages
     attempt = 0
@@ -94,13 +93,13 @@ class BaseContainer(GObject.GObject):
         self.sort = sort
         self.quantity = quantity
 
-    def _assemble_template(self):
+    def _get_template(self):
         pass
 
     @cancellable
-    async def _fetch_page_count(self, session):
+    async def _fetch_page_count(self, request, session):
         try:
-            async with session.get(self.template) as response:
+            async with session.get(request) as response:
                 api_json = await response.read()
                 self.pages = json.loads(api_json)["total_pages"]
         except:
@@ -144,16 +143,15 @@ class BaseContainer(GObject.GObject):
 
     @cancellable
     async def _get_ids(self, session):
-        self._assemble_template()
-
-        await self._fetch_page_count(session)
+        base_request = self._get_template()
+        await self._fetch_page_count(base_request, session)
 
         if self.quantity:
             max_pages = math.ceil(self.quantity/self.PER_PAGE)
             if self.pages > max_pages:
                 self.pages = max_pages
 
-        requests = [f"{self.template}&page={p}" for p in range(1, self.pages+1)]
+        requests = [f"{base_request}&page={p}" for p in range(1, self.pages+1)]
         tasks = [self._fetch_page_ids(r, session) for r in requests]
         ids = await asyncio.gather(*tasks)
         ids = [i for page in ids for i in page]
@@ -254,7 +252,7 @@ class Channel(BaseContainer):
     def __init__(self, id, sort="Most Recent", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Most Recent": "newest",
             "Most Liked": "likes_count",
@@ -273,7 +271,7 @@ class Channel(BaseContainer):
 
         template = f"{template}&order_by={sort_map[self.sort]}"
 
-        self.template = template
+        return template
 
 
 class Tag(BaseContainer):
@@ -282,7 +280,7 @@ class Tag(BaseContainer):
     def __init__(self, id, sort="Popular", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Popular": "newest_popular",
             "Top": "likes_count",
@@ -294,11 +292,11 @@ class Tag(BaseContainer):
         template = f"{template}?per_page={self.PER_PAGE}"
         template = f"{template}&order_by={sort_map[self.sort]}"
 
-        self.template = template
+        return template
 
     @cancellable
-    async def _fetch_page_count(self, session):
-        await super()._fetch_page_count(session)
+    async def _fetch_page_count(self, request, session):
+        await super()._fetch_page_count(request, session)
         # API limits tags to 99 pages
         if self.pages > 99:
             self.pages = 99
@@ -310,7 +308,7 @@ class Search(BaseContainer):
     def __init__(self, id, sort="Relevance", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Relevance": None,
             "Top": "likes_count",
@@ -324,7 +322,7 @@ class Search(BaseContainer):
         if sort_map[self.sort]:
             template = f"{template}&order_by={sort_map[self.sort]}"
 
-        self.template = template
+        return template
 
 
 class Community(BaseContainer):
@@ -333,7 +331,7 @@ class Community(BaseContainer):
     def __init__(self, id, sort="Hot (Monthly)", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Hot (Daily)": "daily",
             "Hot (Weekly)": "weekly",
@@ -358,11 +356,11 @@ class Community(BaseContainer):
 
         template = f"{template}per_page={self.PER_PAGE}"
 
-        self.template = template
+        return template
 
     @cancellable
-    async def _fetch_page_count(self, session):
-        await super()._fetch_page_count(session)
+    async def _fetch_page_count(self, request, session):
+        await super()._fetch_page_count(request, session)
         # API limits communities to 99 pages
         if self.pages > 99:
             self.pages = 99
@@ -374,7 +372,7 @@ class Featured(Community):
     def __init__(self, id="", sort="Recent", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Recent": None,
             "Top of the Month": "top_of_the_month",
@@ -387,7 +385,7 @@ class Featured(Community):
 
         template = f"{template}per_page={self.PER_PAGE}"
 
-        self.template = template
+        return template
 
 
 class CoubOfTheDay(Community):
@@ -396,7 +394,7 @@ class CoubOfTheDay(Community):
     def __init__(self, id="", sort="Recent", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Recent": None,
             "Top": "top",
@@ -409,7 +407,7 @@ class CoubOfTheDay(Community):
 
         template = f"{template}per_page={self.PER_PAGE}"
 
-        self.template = template
+        return template
 
 
 class Story(BaseContainer):
@@ -419,12 +417,12 @@ class Story(BaseContainer):
     def __init__(self, id, sort="", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         # Story URL contains ID + title separated by a dash
         template = f"https://coub.com/api/v2/stories/{self.id.split('-')[0]}/coubs"
         template = f"{template}?per_page={self.PER_PAGE}"
 
-        self.template = template
+        return template
 
 
 class HotSection(BaseContainer):
@@ -433,7 +431,7 @@ class HotSection(BaseContainer):
     def __init__(self, id="", sort="Hot (Monthly)", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Hot (Daily)": "daily",
             "Hot (Weekly)": "weekly",
@@ -448,11 +446,11 @@ class HotSection(BaseContainer):
         template = f"{template}/{sort_map[self.sort]}"
         template = f"{template}?per_page={self.PER_PAGE}"
 
-        self.template = template
+        return template
 
     @cancellable
-    async def _fetch_page_count(self, session):
-        await super()._fetch_page_count(session)
+    async def _fetch_page_count(self, request, session):
+        await super()._fetch_page_count(request, session)
         # API limits hot section to 99 pages
         if self.pages > 99:
             self.pages = 99
@@ -464,7 +462,7 @@ class Random(BaseContainer):
     def __init__(self, id="", sort="Popular", quantity=0):
         super().__init__(id, sort, quantity)
 
-    def _assemble_template(self):
+    def _get_template(self):
         sort_map = {
             "Popular": None,
             "Top": "top",
@@ -477,7 +475,7 @@ class Random(BaseContainer):
 
         template = f"{template}per_page={self.PER_PAGE}"
 
-        self.template = template
+        return template
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Functions
