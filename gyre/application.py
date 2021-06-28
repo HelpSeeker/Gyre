@@ -165,6 +165,8 @@ class Application(Gtk.Application):
         for item in to_remove:
             self.window.list.remove(self.window.list.find(item)[1])
 
+        return not self.idle
+
     def do_import_profile(self, *args):
         if not self.idle:
             dialog = dialogs.ImportDisabledInfo(self.window)
@@ -249,6 +251,9 @@ class Application(Gtk.Application):
             parent=self,
         )
         thread.start()
+
+        if Settings.get_default().auto_remove and not Settings.get_default().repeat_download:
+            GLib.timeout_add_seconds(2, self.do_clean_list)
 
     def do_stop_download(self, *args):
         global CANCELLED

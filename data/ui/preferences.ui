@@ -274,6 +274,18 @@
                 </child>
               </object>
             </child>
+            <child>
+              <object class="HdyActionRow">
+                <property name="title" translatable="yes">Auto Remove</property>
+                <property name="activatable-widget">auto_remove_switch</property>
+                <property name="subtitle" translatable="yes">Remove finished items automatically</property>
+                <child>
+                  <object class="GtkSwitch" id="auto_remove_switch">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
       </object>

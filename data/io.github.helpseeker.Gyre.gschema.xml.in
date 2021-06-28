@@ -168,6 +168,13 @@
         How to treat recoubs during channel downloads
       </description>
     </key>
+    <key type="b" name="auto-remove">
+      <default>false</default>
+      <summary>Autoremove Finished Items</summary>
+      <description>
+        Remove items from the download list as soon as they finish
+      </description>
+    </key>
     <key type="b" name="repeat-download">
       <default>false</default>
       <summary>Repeat Download</summary>

@@ -72,6 +72,7 @@ class PreferenceWindow(Handy.PreferencesWindow):
     recoubs_row = Gtk.Template.Child("recoubs_row")
 
     # Automatization
+    auto_remove_switch = Gtk.Template.Child("auto_remove_switch")
     repeat_download_row = Gtk.Template.Child("repeat_download_row")
     interval_spin_button = Gtk.Template.Child("interval_spin_button")
 
@@ -228,6 +229,10 @@ class PreferenceWindow(Handy.PreferencesWindow):
         self.recoubs_row.bind_name_model(liststore, Handy.ValueObject.dup_string)
         self.recoubs_row.set_selected_index(self.settings.download_recoubs)
         self.recoubs_row.connect('notify::selected-index', self._on_recoubs_download_changed)
+
+        # Auto remove
+        self.auto_remove_switch.set_active(self.settings.auto_remove)
+        self.auto_remove_switch.connect("notify::active", self._on_auto_remove_changed)
 
         # Repeated Downloads
         self.repeat_download_row.set_expanded(self.settings.repeat_download)
@@ -393,6 +398,9 @@ class PreferenceWindow(Handy.PreferencesWindow):
 
     def _on_recoubs_download_changed(self, combo_row, prop_name):
         self.settings.download_recoubs = combo_row.get_selected_index()
+
+    def _on_auto_remove_changed(self, toggle_button, prop_name):
+        self.settings.auto_remove = toggle_button.get_active()
 
     def _on_repeat_download_changed(self, row, prop_name):
         self.settings.repeat_download = row.get_enable_expansion()

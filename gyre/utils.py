@@ -111,6 +111,7 @@ def export_profile(path, liststore):
         "connections",
         "retry_attempts",
         "download_recoubs",
+        "auto_remove",
         "repeat_download",
         "repeat_interval",
         "archive",

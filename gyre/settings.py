@@ -197,6 +197,14 @@ class Settings(Gio.Settings):
         self.set_enum("download-recoubs", value)
 
     @property
+    def auto_remove(self):
+        return self.get_boolean("auto-remove")
+
+    @auto_remove.setter
+    def auto_remove(self, value):
+        self.set_boolean("auto-remove", value)
+
+    @property
     def repeat_download(self):
         return self.get_boolean("repeat-download")
 
