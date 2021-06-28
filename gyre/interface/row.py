@@ -78,7 +78,7 @@ class InputRow(Gtk.ListBoxRow):
         if self.item.complete:
             self.progress_bar.set_fraction(1)
             if Settings.get_default().repeat_download:
-                self.progress_bar.set_text("Finished! Waiting for next download to start...")
+                self.progress_bar.set_text("Waiting for next download to start...")
             elif not self.item.count:
                 self.progress_bar.set_text("Finished! (no new coubs)")
             elif Settings.get_default().output_list:
