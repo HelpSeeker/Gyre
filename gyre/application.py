@@ -32,21 +32,17 @@ from gi.repository import Gtk, Gio, Handy, GLib, GObject, Notify
 
 from gyre import checker
 from gyre import utils
-from gyre.container import cancel_containers, uncancel_containers
-from gyre.coub import cancel_coubs, uncancel_coubs
 from gyre.interface import dialogs
 from gyre.interface.add import AddURLWindow, AddWindow
 from gyre.interface.window import GyreWindow
 from gyre.interface.preferences import PreferenceWindow
 from gyre.settings import Settings
-from gyre.utils import notify_done, notify_error
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# To signal cancellation to the work thread
-CANCELLED = False
+SLEEP_TIMEOUT = 0.5
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -218,9 +214,7 @@ class Application(Gtk.Application):
         if not self.idle:
             return
 
-        uncancel_containers()
-        uncancel_coubs()
-        CANCELLED = False
+        utils.uncancel_download()
 
         # Prompt user, if no existing output folder is selected
         # This can happen if no folder was chosen yet or if the chosen one was deleted
@@ -256,11 +250,7 @@ class Application(Gtk.Application):
             GLib.timeout_add_seconds(2, self.do_clean_list)
 
     def do_stop_download(self, *args):
-        global CANCELLED
-
-        cancel_containers()
-        cancel_coubs()
-        CANCELLED = True
+        utils.cancel_download()
         self._clean_up()
 
     def _on_idle_changed(self, *args):
@@ -278,44 +268,45 @@ class Application(Gtk.Application):
 # Functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-async def process(model):
-    while True:
-        checker.init()
+@utils.cancellable
+def wait():
+    time.sleep(SLEEP_TIMEOUT)
 
-        tout = aiohttp.ClientTimeout(total=None)
-        conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
-        async with aiohttp.ClientSession(timeout=tout, connector=conn) as session:
-            try:
+
+async def process(model):
+    try:
+        while True:
+            checker.init()
+
+            tout = aiohttp.ClientTimeout(total=None)
+            conn = aiohttp.TCPConnector(limit=Settings.get_default().connections)
+            async with aiohttp.ClientSession(timeout=tout, connector=conn) as session:
                 tasks = [item.process(session) for item in model]
                 await asyncio.gather(*tasks)
-            except utils.CancelledError:
-                for item in model:
-                    item.error = True
-                    item.error_msg = "Cancelled"
-                    # "Cancelled" should take precedence over "Finished! Waiting for next download..."
-                    if Settings.get_default().repeat_download:
-                        item.complete = False
-                return
-            except:
-                cancel_containers()
-                cancel_coubs()
-                for item in model:
-                    item.error = True
-                    item.error_msg = "Error: Unknown error!"
-                error = traceback.format_exc()
-                utils.write_error_log(error)
-                GLib.idle_add(notify_error)
-                return
-            finally:
-                checker.uninit()
 
-        if Settings.get_default().repeat_download:
-            for timer in range(Settings.get_default().repeat_interval, 0, -1):
-                for _ in range(120):
-                    if CANCELLED:
-                        break
-                    time.sleep(0.5)
-        else:
-            break
+            checker.uninit()
 
-    GLib.idle_add(notify_done)
+            if Settings.get_default().repeat_download:
+                for _ in range(Settings.get_default().repeat_interval*60/SLEEP_TIMEOUT):
+                    wait()
+            else:
+                break
+
+        GLib.idle_add(utils.notify_done)
+    except utils.CancelledError:
+        for item in model:
+            item.error = True
+            item.error_msg = "Cancelled"
+            # "Cancelled" should take precedence over "Finished! Waiting for next download..."
+            if Settings.get_default().repeat_download:
+                item.complete = False
+    except:
+        utils.cancel_download()
+        for item in model:
+            item.error = True
+            item.error_msg = "Error: Unknown error!"
+        error = traceback.format_exc()
+        utils.write_error_log(error)
+        GLib.idle_add(utils.notify_error)
+    finally:
+        checker.uninit()

@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Gyre.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
+from functools import wraps
 import json
 import pathlib
 import threading
@@ -23,6 +25,32 @@ import time
 from gi.repository import GLib, Notify
 
 from gyre.settings import Settings
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Global variables
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CANCELLED = False
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Decorators
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def cancellable(func):
+    if asyncio.iscoroutinefunction(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            if CANCELLED:
+                raise CancelledError
+            return await func(*args, **kwargs)
+    else:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if CANCELLED:
+                raise CancelledError
+            return func(*args, **kwargs)
+
+    return wrapper
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -46,6 +74,16 @@ class WorkThread(threading.Thread):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def uncancel_download():
+    global CANCELLED
+    CANCELLED = False
+
+
+def cancel_download():
+    global CANCELLED
+    CANCELLED = True
+
 
 def get_cache_dir():
     cache_dir = pathlib.Path(GLib.get_user_cache_dir())

@@ -24,14 +24,8 @@ import unicodedata
 
 from aiohttp import ClientError
 
-from gyre import utils
 from gyre.settings import Settings
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Global variables
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-CANCELLED = False
+from gyre.utils import cancellable, write_error_log
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -88,6 +82,22 @@ class Coub:
             self.video = True
             self.audio = False
 
+    def _log_infos(self):
+        infos = {
+            "id": self.id,
+            "title": self.title,
+            "creation": self.creation,
+            "channel": self.channel,
+            "community": self.community,
+            "tags": self.tags,
+        }
+        with pathlib.Path(Settings.get_default().info_json_path).open("a") as f:
+            print(json.dumps(infos), file=f)
+
+    def _log_archive_entry(self):
+        with pathlib.Path(Settings.get_default().archive_path).open("a") as f:
+            print(self.id, file=f)
+
     def _clean_up(self):
         if Settings.get_default().keep_streams:
             return
@@ -103,6 +113,7 @@ class Coub:
         self.container.done += 1
         self._clean_up()
 
+    @cancellable
     def _update_properties(self, api_json):
         self.title = api_json["title"]
         self.creation = api_json["created_at"]
@@ -114,6 +125,7 @@ class Coub:
         else:
             self.community = "undefined"
 
+    @cancellable
     def _assemble_name(self):
         if not Settings.get_default().name_template:
             return self.id
@@ -132,10 +144,8 @@ class Coub:
 
         return name
 
+    @cancellable
     async def _fetch_infos(self):
-        if CANCELLED:
-            raise utils.CancelledError
-
         async with self.session.get(f"https://coub.com/api/v2/coubs/{self.id}") as response:
             api_json = await response.read()
             api_json = json.loads(api_json)
@@ -162,10 +172,8 @@ class Coub:
         if Settings.get_default().download_share_version:
             self.merged_file = self.video_file
 
+    @cancellable
     def _check_existence(self):
-        if CANCELLED:
-            raise utils.CancelledError
-
         exists = None
         if self.merged_file.exists():
             exists = self.merged_file
@@ -177,26 +185,8 @@ class Coub:
         if exists and not Settings.get_default().overwrite:
             raise CoubExistsError(exists)
 
-    def _log_infos(self):
-        infos = {
-            "id": self.id,
-            "title": self.title,
-            "creation": self.creation,
-            "channel": self.channel,
-            "community": self.community,
-            "tags": self.tags,
-        }
-        with pathlib.Path(Settings.get_default().info_json_path).open("a") as f:
-            print(json.dumps(infos), file=f)
-
-    def _log_archive_entry(self):
-        with pathlib.Path(Settings.get_default().archive_path).open("a") as f:
-            print(self.id, file=f)
-
+    @cancellable
     async def _download(self):
-        if CANCELLED:
-            raise utils.CancelledError
-
         args = []
         if self.video:
             args.append([self.video_link, self.video_file, self.session])
@@ -213,6 +203,7 @@ class Coub:
         if self.audio:
             self.audio_file.with_suffix(f"{self.audio_file.suffix}.gyre").replace(self.audio_file)
 
+    @cancellable
     def _check_integrity(self):
         if self.video and file_corrupted(self.video_file):
             fix_old_storage_method(self.video_file)
@@ -223,6 +214,7 @@ class Coub:
         if self.audio and file_corrupted(self.audio_file):
             raise CoubCorruptedError(self.audio_file)
 
+    @cancellable
     def _merge_streams(self):
         # temp_file uses prefix to not mess with FFmpeg's automatic muxer detection
         temp_file = pathlib.Path(self.merged_file.parent, f"temp_{self.merged_file.name}")
@@ -248,10 +240,8 @@ class Coub:
         # necessary as FFmpeg can't change files in-place, if merge ext is mp4
         temp_file.replace(self.merged_file)
 
+    @cancellable
     async def process(self):
-        if CANCELLED:
-            raise utils.CancelledError
-
         retries = Settings.get_default().retry_attempts
         attempt = 0
         while retries < 0 or attempt <= retries:
@@ -271,15 +261,15 @@ class Coub:
             except ClientError:
                 attempt += 1
             except CoubUnavailableError:
-                utils.write_error_log(f"https://coub.com/view/{self.id} is unavailable")
+                write_error_log(f"https://coub.com/view/{self.id} is unavailable")
                 self.container.invalid += 1
                 break
             except CoubExistsError as error:
-                utils.write_error_log(f"{error.path.name} already exists")
+                write_error_log(f"{error.path.name} already exists")
                 self.container.exist += 1
                 break
             except CoubCorruptedError as error:
-                utils.write_error_log(f"{error.path.name} corrupted")
+                write_error_log(f"{error.path.name} corrupted")
                 self.container.invalid += 1
                 break
 
@@ -289,16 +279,7 @@ class Coub:
 # Functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def uncancel_coubs():
-    global CANCELLED
-    CANCELLED = False
-
-
-def cancel_coubs():
-    global CANCELLED
-    CANCELLED = True
-
-
+@cancellable
 def get_valid_filename(title, allow_unicode):
     if allow_unicode:
         title = unicodedata.normalize("NFKC", title)
@@ -328,7 +309,7 @@ def get_valid_filename(title, allow_unicode):
 
     return title
 
-
+@cancellable
 def get_stream_lists(api_json):
     # All the following resolutions are max. values
     # Depending on the aspect ratio, one side can be smaller
@@ -405,20 +386,30 @@ def get_stream_lists(api_json):
     return (video, audio)
 
 
+@cancellable
+async def save_chunk(stream, file):
+    chunk = await stream.content.read(Settings.get_default().download_chunk_size)
+
+    if not chunk:
+        return False
+
+    file.write(chunk)
+
+    return True
+
+
+@cancellable
 async def save_stream(link, path, session):
     async with session.get(link) as stream:
         # Open file with .gyre suffix to easily distinguish temp files
         # .gyre was chosen, to ensure no accidental file erasure (possible with .part)
         with path.with_suffix(f"{path.suffix}.gyre").open("wb") as f:
-            while True:
-                if CANCELLED:
-                    raise utils.CancelledError
-                chunk = await stream.content.read(Settings.get_default().download_chunk_size)
-                if not chunk:
-                    break
-                f.write(chunk)
+            chunk = True
+            while chunk:
+                chunk = await save_chunk(stream, f)
 
 
+@cancellable
 def fix_old_storage_method(path):
     # Coub used to store videos in a broken state and fixed them before playback
     # They stopped doing this when they introduced the watermarks
@@ -429,6 +420,7 @@ def fix_old_storage_method(path):
         f.write(b'\x00\x00' + temp[2:])
 
 
+@cancellable
 def file_corrupted(path):
     command = ["ffmpeg", "-v", "error", "-i", str(path), "-t", "1", "-f", "null", "-"]
     out = subprocess.run(command, capture_output=True, text=True, check=False)

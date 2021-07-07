@@ -16,7 +16,6 @@
 # along with Gyre.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-from functools import wraps
 import json
 import math
 import pathlib
@@ -29,37 +28,24 @@ from gi.repository import GObject
 
 from gyre import checker
 from gyre.coub import Coub
-from gyre.utils import CancelledError, write_error_log
+from gyre.utils import cancellable, write_error_log
 from gyre.settings import Settings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Global variables
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CANCELLED = False
-
 # A hard limit on how many Coubs to process at once
 # Prevents excessive RAM usage for very large downloads
 COUB_LIMIT = 1000
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Decorator
+# Classes
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def cancellable(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        if CANCELLED:
-            raise CancelledError
-        return await func(*args, **kwargs)
-
-    return wrapper
 class ContainerUnavailableError(Exception):
     pass
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Classes
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class APIResponseError(Exception):
     pass
@@ -491,16 +477,6 @@ class Random(BaseContainer):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-def uncancel_containers():
-    global CANCELLED
-    CANCELLED = False
-
-
-def cancel_containers():
-    global CANCELLED
-    CANCELLED = True
-
 
 def create_container(type, id, sort, quantity):
     args = {}
