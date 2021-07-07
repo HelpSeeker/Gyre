@@ -24,6 +24,7 @@ import re
 from urllib.parse import quote as urlquote
 from urllib.parse import unquote as urlunquote
 
+from aiohttp import ClientError
 from gi.repository import GObject
 
 from gyre import checker
@@ -53,6 +54,8 @@ def cancellable(func):
         return await func(*args, **kwargs)
 
     return wrapper
+class ContainerUnavailableError(Exception):
+    pass
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Classes
@@ -100,10 +103,12 @@ class BaseContainer(GObject.GObject):
     async def _fetch_page_count(self, request, session):
         try:
             async with session.get(request) as response:
-                api_json = await response.read()
-                self.pages = json.loads(api_json)["total_pages"]
-        except:
-            raise APIResponseError
+                api_json = json.loads(await response.read())
+                if api_json.get("error") is not None:
+                    raise ContainerUnavailableError from None
+                self.pages = api_json.get("total_pages")
+        except ClientError:
+            raise APIResponseError from None
 
     @cancellable
     async def _fetch_api_json(self, request, session):
@@ -111,7 +116,7 @@ class BaseContainer(GObject.GObject):
             async with session.get(request) as response:
                 api_json = await response.read()
                 api_json = json.loads(api_json)
-        except:
+        except ClientError:
             api_json = None
 
         return api_json
@@ -126,7 +131,7 @@ class BaseContainer(GObject.GObject):
             self.attempt += 1
 
         if not api_json:
-            raise APIResponseError
+            raise APIResponseError from None
 
         ids = []
         for coub in api_json["coubs"]:
@@ -193,6 +198,10 @@ class BaseContainer(GObject.GObject):
                 coubs = coubs[COUB_LIMIT:]
 
             self.complete = True
+        except ContainerUnavailableError:
+            self.error = True
+            self.error_msg = f"Error: {self.type} doesn't exist"
+            write_error_log(f"{self.type}: {self.id} doesn't exist")
         except APIResponseError:
             self.error = True
             self.error_msg = "Error: Couldn't fetch API response!"
@@ -216,6 +225,8 @@ class SingleCoub(BaseContainer):
     # async is unnecessary here, but avoids the need for special treatment
     @cancellable
     async def _get_ids(self, session):
+        # Only here to test if coub exists
+        await self._fetch_page_count(f"https://coub.com/api/v2/coubs/{self.id}", session)
         return [self.id]
 
 
