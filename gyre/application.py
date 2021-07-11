@@ -287,7 +287,7 @@ async def process(model):
             checker.uninit()
 
             if Settings.get_default().repeat_download:
-                for _ in range(Settings.get_default().repeat_interval*60/SLEEP_TIMEOUT):
+                for _ in range(int(Settings.get_default().repeat_interval*60/SLEEP_TIMEOUT)):
                     wait()
             else:
                 break
