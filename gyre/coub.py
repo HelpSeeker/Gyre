@@ -258,7 +258,7 @@ class Coub:
                 if Settings.get_default().info_json:
                     self._log_infos()
                 break
-            except ClientError:
+            except (ClientError, json.decoder.JSONDecodeError):
                 attempt += 1
             except CoubUnavailableError:
                 write_error_log(f"https://coub.com/view/{self.id} is unavailable")

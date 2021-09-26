@@ -93,7 +93,7 @@ class BaseContainer(GObject.GObject):
                 if api_json.get("error") is not None:
                     raise ContainerUnavailableError from None
                 self.pages = api_json.get("total_pages")
-        except ClientError:
+        except (ClientError, json.decoder.JSONDecodeError):
             raise APIResponseError from None
 
     @cancellable
@@ -102,7 +102,7 @@ class BaseContainer(GObject.GObject):
             async with session.get(request) as response:
                 api_json = await response.read()
                 api_json = json.loads(api_json)
-        except ClientError:
+        except (ClientError, json.decoder.JSONDecodeError):
             api_json = None
 
         return api_json
