@@ -197,6 +197,7 @@ def translate_community_name(community, direction="to_ui"):
         "gaming": "Gaming",
         "live-pictures": "Live Pictures",
         "mashup": "Mashup",
+        "memes": "Memes",
         "movies": "Movies & TV",
         "music": "Music",
         "nature-travel": "Nature & Travel",
