@@ -244,6 +244,17 @@ class AddWindow(Handy.Window):
             ],
             "default_sort": 0,
         },
+        "Best": {
+            "id": 11,
+            "entry_label": "Year",
+            "placeholder": "e.g. 2012",
+            "need_id": True,
+            "sort_list": [
+                "Popular",
+                "Hidden gems",
+            ],
+            "default_sort": 0,
+        },
     }
 
     def __init__(self, model, item=None):
@@ -427,6 +438,11 @@ def map_input(url, quantity):
         "Random": {
             "/top": "Top",
         },
+        "Best": {
+            "/hidden-gems": "Hidden gems",
+            "/memes": None,
+            "/popular-tags": None,
+        }
     }
 
     # Shorten URL for easier parsing
@@ -449,6 +465,8 @@ def map_input(url, quantity):
         type = "Story"
     elif url.startswith("coub.com/random"):
         type = "Random"
+    elif url.startswith("coub.com/best"):
+        type = "Best"
     elif url in ["coub.com", "coub.com/rising", "coub.com/fresh", "coub.com/hot"]:
         type = "Hot Section"
     else:
@@ -478,6 +496,8 @@ def map_input(url, quantity):
         id = url.partition("coub.com/community/")[2]
     elif type == "Story":
         id = url.partition("coub.com/stories/")[2]
+    elif type == "Best":
+        id = url.partition("coub.com/best/")[2]
 
     args = [type, id, sort, quantity]
     return create_container(*args)

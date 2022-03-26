@@ -474,6 +474,38 @@ class Random(BaseContainer):
 
         return template
 
+
+class Best(BaseContainer):
+    type = "Best"
+
+    def __init__(self, id="", sort="Popular", quantity=0):
+        super().__init__(id, sort, quantity)
+
+    def _get_template(self):
+        # Could be read from https://coub.com/api/v2/best
+        # I doubt they'll change the links during the last week though
+
+        # 2012 also didn't have a Hidden gems category,
+        # so just point both sorts to the same list
+        best_map = {
+            "2012": {"Popular": 37, "Hidden gems": 37},
+            "2013": {"Popular": 33, "Hidden gems": 35},
+            "2014": {"Popular": 29, "Hidden gems": 31},
+            "2015": {"Popular": 24, "Hidden gems": 27},
+            "2016": {"Popular": 20, "Hidden gems": 22},
+            "2017": {"Popular": 10, "Hidden gems": 12},
+            "2018": {"Popular": 7, "Hidden gems": 9},
+            "2019": {"Popular": 14, "Hidden gems": 18},
+            "2020": {"Popular": 53, "Hidden gems": 57},
+            "2021": {"Popular": 62, "Hidden gems": 64},
+        }
+
+        template = f"https://coub.com/api/v2/best/{best_map[self.id][self.sort]}/coubs"
+        # API ignores per_page setting, but we still need it for the standard template format
+        template = f"{template}?per_page={self.PER_PAGE}"
+
+        return template
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -509,3 +541,5 @@ def create_container(type, id, sort, quantity):
         return HotSection(**args)
     if type == "Random":
         return Random(**args)
+    if type == "Best":
+        return Best(**args)
