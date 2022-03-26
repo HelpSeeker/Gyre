@@ -1,7 +1,7 @@
 project('gyre',
   license: 'GPL-3.0-or-later',
   meson_version: '>= 0.51.0',
-  version: '0.1.2',
+  version: '0.1.3',
 )
 
 # General project infos (e.g. for the about dialog)
