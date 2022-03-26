@@ -74,6 +74,11 @@
               </object>
             </child>
             <child>
+              <object class="GtkComboBoxText" id="best_dropdown">
+                <property name="no-show-all">True</property>
+              </object>
+            </child>
+            <child>
               <object class="GtkButton" id="placeholder">
                 <property name="label" translatable="yes">Browse...</property>
               </object>

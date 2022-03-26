@@ -81,6 +81,7 @@ class AddWindow(Handy.Window):
     entry_label = Gtk.Template.Child("entry_label")
     id_entry = Gtk.Template.Child("id_entry")
     community_dropdown = Gtk.Template.Child("community_dropdown")
+    best_dropdown = Gtk.Template.Child("best_dropdown")
     list_button = Gtk.Template.Child("placeholder")
     sort_dropdown = Gtk.Template.Child("sort_dropdown")
     limit_spin_button = Gtk.Template.Child("limit_spin_button")
@@ -254,6 +255,18 @@ class AddWindow(Handy.Window):
                 "Hidden gems",
             ],
             "default_sort": 0,
+            "values": {
+                "2012": 0,
+                "2013": 1,
+                "2014": 2,
+                "2015": 3,
+                "2016": 4,
+                "2017": 5,
+                "2018": 6,
+                "2019": 7,
+                "2020": 8,
+                "2021": 9,
+            },
         },
     }
 
@@ -296,6 +309,7 @@ class AddWindow(Handy.Window):
         self.type_dropdown.connect("notify::active", self._on_type_changed)
         self.id_entry.connect("notify::text", self._on_entry_changed)
         self.community_dropdown.connect("changed", self._on_community_changed)
+        self.best_dropdown.connect("changed", self._on_best_changed)
         self.list_button.connect("clicked", self._on_list_button_clicked)
         self.sort_dropdown.connect("notify::active", self._on_sort_changed)
         self.limit_spin_button.connect("value-changed", self._on_spin_button_changed)
@@ -306,6 +320,8 @@ class AddWindow(Handy.Window):
         # Populate dropdown lists
         for community in self.SUPPORTED_FORMATS["Community"]["values"]:
             self.community_dropdown.append_text(translate_community_name(community))
+        for best in self.SUPPORTED_FORMATS["Best"]["values"]:
+            self.best_dropdown.append_text(best)
         for type in self.SUPPORTED_FORMATS:
             self.type_dropdown.append_text(type)
 
@@ -323,6 +339,7 @@ class AddWindow(Handy.Window):
         if self.type == "List":
             self.id_entry.hide()
             self.community_dropdown.hide()
+            self.best_dropdown.hide()
             self.list_button.show()
 
             # Don't set default file, unless ID is an existing path
@@ -331,13 +348,23 @@ class AddWindow(Handy.Window):
         elif self.type == "Community":
             self.id_entry.hide()
             self.list_button.hide()
+            self.best_dropdown.hide()
             self.community_dropdown.show()
 
             if self.id and self.id in self.SUPPORTED_FORMATS[self.type]["values"]:
                 self.community_dropdown.set_active(self.SUPPORTED_FORMATS[self.type]["values"][self.id])
+        elif self.type == "Best":
+            self.id_entry.hide()
+            self.list_button.hide()
+            self.community_dropdown.hide()
+            self.best_dropdown.show()
+
+            if self.id and self.id in self.SUPPORTED_FORMATS[self.type]["values"]:
+                self.best_dropdown.set_active(self.SUPPORTED_FORMATS[self.type]["values"][self.id])
         else:
             self.list_button.hide()
             self.community_dropdown.hide()
+            self.best_dropdown.hide()
             self.id_entry.show()
             self.id_entry.set_sensitive(self.SUPPORTED_FORMATS[self.type]["need_id"])
             self.id_entry.set_placeholder_text(self.SUPPORTED_FORMATS[self.type]["placeholder"])
@@ -364,6 +391,10 @@ class AddWindow(Handy.Window):
 
     def _on_community_changed(self, dropdown):
         self.id = translate_community_name(dropdown.get_active_text(), direction="to_api")
+        self._update_add_button()
+
+    def _on_best_changed(self, dropdown):
+        self.id = dropdown.get_active_text()
         self._update_add_button()
 
     def _on_list_button_clicked(self, dialog_button):
