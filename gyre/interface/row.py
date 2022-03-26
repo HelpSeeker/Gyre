@@ -1,4 +1,4 @@
-# Copyright (C) 2020-2021 HelpSeeker <AlmostSerious@protonmail.ch>
+# Copyright (C) 2020-2022 HelpSeeker <AlmostSerious@protonmail.ch>
 #
 # This file is part of Gyre.
 #
