@@ -201,8 +201,6 @@ def translate_community_name(community, direction="to_ui"):
         "movies": "Movies & TV",
         "music": "Music",
         "nature-travel": "Nature & Travel",
-        "news": "News & Politics",
-        "nsfw": "NSFW",
         "science-technology": "Science & Technology",
         "sports": "Sports",
         "standup-jokes": "Stand-up & Jokes",
