@@ -504,6 +504,7 @@ class Best(BaseContainer):
             "2019": {"Popular": 14, "Hidden gems": 18},
             "2020": {"Popular": 53, "Hidden gems": 57},
             "2021": {"Popular": 62, "Hidden gems": 64},
+            "2022": {"Popular": 72, "Hidden gems": 76},
         }
 
         template = f"https://coub.com/api/v2/best/{best_map[self.id][self.sort]}/coubs"
