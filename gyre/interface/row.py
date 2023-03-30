@@ -75,6 +75,13 @@ class InputRow(Gtk.ListBoxRow):
         self.model.remove(self.model.find(self.item)[1])
 
     def _on_progress_update(self, *args):
+        # Initial state
+        if not self.progress_bar.get_visible():
+            self.progress_bar.set_sensitive(True)
+            self.progress_bar.set_visible(True)
+            self.progress_bar.set_fraction(0)
+            self.progress_bar.set_text("Fetching links...")
+
         if self.item.complete:
             self.progress_bar.set_fraction(1)
             if Settings.get_default().repeat_download:
@@ -104,9 +111,3 @@ class InputRow(Gtk.ListBoxRow):
         # Parsing progress
         elif self.item.page_progress:
             self.progress_bar.set_fraction(self.item.page_progress/self.item.pages)
-        # Initial state
-        else:
-            self.progress_bar.set_sensitive(True)
-            self.progress_bar.set_visible(True)
-            self.progress_bar.set_fraction(0)
-            self.progress_bar.set_text("Fetching links...")
