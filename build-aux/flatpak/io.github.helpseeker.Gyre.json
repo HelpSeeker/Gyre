@@ -1,7 +1,7 @@
 {
     "app-id" : "io.github.helpseeker.Gyre",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "44",
+    "runtime-version" : "46",
     "sdk" : "org.gnome.Sdk",
     "command" : "gyre",
     "finish-args" : [
@@ -23,7 +23,7 @@
         "*.a"
     ],
     "modules" : [
-        "python3-aiohttp.json",
+        "python3-modules.json",
         {
             "name" : "ffmpeg",
             "config-opts" : [
@@ -36,7 +36,7 @@
                 "--enable-protocol=file",
                 "--enable-decoder=h264,mp3",
                 "--enable-encoder=wrapped_avframe,pcm_s16le",
-                "--enable-demuxer=concat,mov,mp3",
+                "--enable-demuxer=concat,mov,mp3,asf",
                 "--enable-muxer=matroska,mp4,asf,avi,flv,f4v,mov,null",
                 "--enable-bsf=h264_mp4toannexb",
                 "--enable-filter=aresample"
@@ -45,7 +45,7 @@
                 {
                     "type" : "git",
                     "url" : "https://git.ffmpeg.org/ffmpeg.git",
-                    "tag" : "n5.0"
+                    "tag" : "n5.1.4"
                 }
             ]
         },
@@ -65,7 +65,7 @@
                 {
                     "type" : "git",
                     "url" : "https://gitlab.gnome.org/GNOME/libhandy.git",
-                    "tag" : "1.8.2"
+                    "tag" : "1.8.3"
                 }
             ]
         },
