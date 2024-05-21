@@ -12,7 +12,7 @@ license = 'gpl-3-0'
 website = 'https://github.com/HelpSeeker/Gyre'
 author = 'HelpSeeker'
 email = 'AlmostSerious@protonmail.ch'
-copyright = '2020-2023'
+copyright = '2020-2024'
 
 # Dependency checks
 python = import('python')
